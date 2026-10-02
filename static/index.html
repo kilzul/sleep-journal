@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Journal</title>
+</head>
+<body>
+
+    <p class="demo-notice">Connection demo: submissions are printed in the server terminal. Nothing is saved and login is not active yet.</p>
+
+    <div id="navbar">  
+        <span class="selector" id="overview-selector">Overview</span>
+        <span class="selector" id="journals-selector">Journals</span>
+        <span class="selector" id="calendar-selector">Calendar</span>
+        <span class="selector" id="statistics-selector">Statistics</span>
+    </div>
+
+    <section class="page" id="sign-up-page">
+
+        <div class="page-title" id="sign-up-title">Sign Up</div>
+        <div class="form">
+            <form id="sign-up-form" action="/api/signup" method="POST">
+                <div><label id="name-label" for="name">Name:</label></div>
+                <div><input type="text" id="name" name="name" maxlength="100" autocomplete="name" required></div>
+                <div><label id="email-label" for="email">Email:</label></div>
+                <div><input type="email" id="email" name="email" autocomplete="email" required></div>
+                <div><label id="password-label" for="password">Password:</label></div>
+                <div><input type="password" id="password" name="password" maxlength="1024" autocomplete="new-password" required></div>
+                <button type="submit">Sign Up</button>
+            </form>
+            <button type="button" id="log-in-button">I already have an account</button>
+        </div>
+
+    </section>
+
+    <section class="page" id="log-in-page">
+
+        <div class="page-title" id="log-in-title">Log In</div>
+        <div class="form">
+            <form id="log-in-form" action="/api/login" method="POST">
+                <div><label for="login-email">Email:</label></div>
+                <div><input type="email" id="login-email" name="email" autocomplete="email" required></div>
+                <div><label for="login-password">Password:</label></div>
+                <div><input type="password" id="login-password" name="password" maxlength="1024" autocomplete="current-password" required></div>
+                <button type="submit">Log In</button>
+            </form>
+            <button type="button" id="sign-up-button">I don't have an account</button>
+        </div>
+
+        <div id="welcome-message">
+            <span id="welcome-message-text"></span>
+        </div>
+
+
+    </section>
+
+    <section class="page" id="overview-page">
+
+        <div class="page-title" id="overview-title">Overview</div>
+
+
+        <div id="bedtime-timer" class="data-card">
+            <p class="data-card-title">Bedtime Timer</p>
+            <div id="bedtime-timer-display">
+                <span id="bedtime-timer-graphic"></span>
+                <span id="bedtime-timer-description"></span>
+                <span id="bedtime-timer-value"></span>
+            </div>
+        </div>
+
+        <div id="best-sleep-day" class="data-card">
+            <p class="data-card-title">Best Sleep Day</p>
+            <div id="week-month-year">
+                <span class="best-sleep-day-selector">Week</span>
+                <span class="best-sleep-day-selector">Month</span>
+                <span class="best-sleep-day-selector">Year</span>
+            </div>
+            <div id="best-sleep-day-display">
+                <span id="best-sleep-day-graphic"></span>
+                <span id="best-sleep-day-value"></span>
+            </div>
+        </div>
+
+        <div id="weekly-sleep-average" class="data-card">
+            <p class="data-card-title">Weekly Sleep Average</p>
+            <p class="data-card-value" id="weekly-sleep-average-value"></p>
+            <span id="circle-graphic-weekly-sleep-average"></span>
+        </div>
+
+
+    </section>
+
+    <section class="page" id="journals-page">
+
+        <div class="page-title" id="journals-title">Journals</div>
+        <span id="search-journals"></span>
+        <span id="add-journal-button">+</span>
+        <div id="journals-container"></div>
+            <!-- journals go here, will write a function that puts there here with a html card format in the javascript -->
+
+    </section>
+
+    <section class="page" id="calendar-page">
+
+        <div class="page-title" id="calendar-title">Calendar</div>
+        <div id="calendar-container">
+            <!-- will have to figure out a function to make a calendar here, or call an api or summ -->
+        </div>
+
+    </section>
+
+    <section class="page" id="statistics-page">
+
+        <div class="page-title" id="statistics-title">Statistics</div>
+        <div id="statistics-container">
+            <!-- will put your graphs and stuff here -->
+        </div>
+
+    </section>
+
+
+</body>
+</html>
