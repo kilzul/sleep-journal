@@ -19,7 +19,7 @@
 
         <div class="page-title" id="sign-up-title">Sign Up</div>
         <div id="form">
-            <form>
+            <form id="sign-up-form" action="/api/signup" method="POST">
                 <div><label id="name-label" for="Name">Name:</label></div>
                 <div><input type="text" id="name" name="name" required></div>
                 <div><label id="email-label" for="email">Email:</label></div>
@@ -37,7 +37,7 @@
 
         <div class="page-title" id="log-in-title">Log In</div>
         <div id="form">
-            <form>
+            <form id="log-in-form" action="/api/login" method="POST">
                 <div><label id="email-label" for="email">Email:</label></div>
                 <div><input type="email" id="email" name="email" required></div>
                 <div><label id="password-label" for="password">Password:</label></div>
@@ -96,7 +96,7 @@
         <span id="search-journals"></span>
         <span id="add-journal-button">+</span>
         <div id="journals-container"></div>
-            <!-- journals go here, will write a function that puts there here with a html card format in the javascript -->
+            <!-- journals go here, will write a function that puts them here with a html card format in the javascript -->
         </div>
 
     </section>
