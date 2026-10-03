@@ -9,7 +9,7 @@ from backend.db import check_login, insert_user
 
 
 app = FastAPI()
-HTML_FILE = "static" / "index.html"
+HTML_FILE = Path(__file__).resolve().parent / "static" / "index.html"
 
 
 @app.exception_handler(Error)
