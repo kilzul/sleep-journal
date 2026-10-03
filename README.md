@@ -1,12 +1,10 @@
 # Sleep Journal
 
-This uses the same approach as the original test form:
+The frontend uses ordinary HTML POST forms and Python functions with `Form(...)`. Signup saves the name, email, and an Argon2 password hash in your own `public.users` table. Login checks the submitted password against that hash. The database is hosted on Supabase; this flow uses Postgres directly.
 
 ```text
-HTML form → POST request → Python Form(...) → print a dictionary
+HTML form → POST request → Python Form(...) → database function → JSON message
 ```
-
-There is no CSS, JavaScript, or custom validation class. Nothing is written to the database, and signup/login do not authenticate users yet. Passwords are received but redacted in terminal output.
 
 ## Run and test
 
@@ -14,29 +12,39 @@ From the repository root:
 
 ```sh
 source venv/bin/activate
+pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-Open **http://127.0.0.1:8000/**. If an older server is running, stop it with Ctrl+C first.
+The root `.env` needs your existing Postgres connection string:
 
-All sections are visible on one plain HTML page. Navigation has the original four selector spans; the frontend developer will add section visibility switching. Fill out Sign Up or Log In and submit it. The browser navigates to a JSON receipt, just like the original demo. Check the terminal where Uvicorn runs for the submitted dictionary. Use the browser Back button to return to the forms.
-
-Overview, Calendar, and Statistics remain placeholders. Journals has its original `+` placeholder and empty container; the frontend developer will build the journal form.
-
-## How the connection works
-
-In `static/index.html`, each form has an `action` and `method="POST"`. The browser sends its inputs directly to that route. An input's `name` attribute matches an argument in the Python function:
-
-```html
-<form action="/api/signup" method="POST">
-    <input name="name" required>
-    <input name="email" type="email" required>
-    <input name="password" type="password" required>
-    <button type="submit">Sign Up</button>
-</form>
+```env
+SUPABASE_DB_URL=your_postgres_connection_string
 ```
 
-In `main.py`, `handle_signup()` receives `name`, `email`, and `password` using `Form(...)`, builds a dictionary, prints it, and returns a message. The other handlers follow the same pattern.
+Keep `.env` private. The Supabase API URL, publishable key, and `APP_URL` are no longer used. Restart Uvicorn after changing environment settings.
+
+1. Open **http://127.0.0.1:8000/** and submit the Sign Up form.
+2. The browser shows `Signup successful. You can now log in.` The account is saved in `public.users`; no confirmation email is sent.
+3. Use the browser Back button or reopen the root page, then submit Log In with the same email and password.
+4. A matching password returns `{"message": "Login successful"}` to the browser.
+5. Try a wrong password: the response is `Incorrect email or password.` with status 401. A missing account or an old row without a password hash gets the same error.
+
+Accounts previously created through Supabase Auth are separate from `public.users`. Sign up through this form to create an account for this implementation. Existing database rows and Supabase Auth accounts are preserved. Older `public.users` rows with uppercase letters in their email need their email lowercased to match this lookup.
+
+## What changed
+
+- `main.py` calls `insert_user()` for signup and `check_login()` for login. These remain plain functions using `Form(...)`.
+- `backend/db.py` keeps your signup hashing code and adds `check_login()`. It looks up the stored hash by email, then calls `password_hasher.verify(password, stored_hash)`. It does not hash the login password again and compare strings, because hashes contain a random salt.
+- Both database functions trim and lowercase emails. Passwords are passed through exactly as submitted. SQL uses parameters rather than putting input into SQL strings.
+- The existing `password_hash` column is used; no table changes were needed. Your database already requires unique usernames and emails, so duplicate signup returns status 409.
+- Database failures return a short status 503 response. Debug prints and their unused dictionaries have been removed. Passwords, stored hashes, and connection strings are never printed or returned.
+- Removed the Supabase Auth helper `backend/auth.py`, its signup/login calls, email confirmation handling, and the SDK dependencies. Added `pwdlib[argon2]` to `requirements.txt`.
+- In `static/index.html`, only the notice text changed in this step. Form actions, input names, layout, original selector spans, and the journal `+` placeholder are unchanged.
+
+There is still no JavaScript, CSS, or custom request class. **Login checks credentials; it does not yet create a cookie or session that keeps the browser logged in.** Journal submission returns a receipt without saving inputs, and journal storage remains for you to implement.
+
+## Form connections
 
 | Form action | Python function | Input names |
 | --- | --- | --- |
@@ -44,23 +52,10 @@ In `main.py`, `handle_signup()` receives `name`, `email`, and `password` using `
 | `/api/login` | `handle_login()` | `email`, `password` |
 | `/api/journals` | `handle_journal()` | `sleep_date`, `bedtime`, `wake_time`, `quality`, `notes` |
 
-The `/api/journals` handler is ready for a future form, but no journal form is currently in the HTML. It expects date/time strings, integer `quality`, and optional `notes` defaulting to an empty string. The frontend developer can use the listed names or agree on changes to the handler. `Form(...)` requires a field; `Form("")` makes it optional. This simple demo doesn't check sleep-time ordering or implement account validation.
+Use `method="POST"` and input `name` attributes matching the Python arguments. Ordinary form submission opens the JSON response. The frontend developer can later use JavaScript to display that message on the page, switch sections, and build the journal form.
 
-To add database code yourself, use the received arguments inside each handler where its comment indicates. The original `backend/db.py` is still available, but this app does not import or call it. The actual password is available in the `password` argument for future authentication code; only the printed dictionary uses `[redacted]`.
+## Informal message for the frontend developer
 
-## Changes
+> Hey, signup and login work through normal HTML POST forms now. Signup sends name/email/password to `/api/signup`; Python hashes the password and saves it in our users table. Login sends email/password to `/api/login`; Python checks the stored hash and returns a Login successful message or an error. The layout and existing IDs stay the same, so you can still handle interactivity on your side. The handlers return JSON responses without debug prints. Sessions and journal storage are still to be added.
 
-See [FRONTEND_CHANGES.md](FRONTEND_CHANGES.md) for the changes from the original frontend folder, including the HTML edits and form fields agreed with the backend.
-
-- The real frontend is in `static/index.html`; the original demo HTML was removed.
-- Removed CSS and JavaScript files and their HTML references.
-- Restored the original four navigation selector spans and removed the added signup/login navigation buttons. Visibility switching will be added by the frontend developer. Every section/form is currently visible.
-- Replaced JSON request models with ordinary Python functions using `Form(...)`.
-- Each submission prints a dictionary and returns a JSON receipt. No database calls, in-page receipt handling, or custom validation classes.
-- Removed the unused static asset mount since the app now serves only the HTML file.
-
-The runtime needs `fastapi`, `uvicorn`, and `python-multipart`, already installed in the existing environment. No database credentials are needed for this demo.
-
-## Message for the frontend developer
-
-> Hey, I simplified the connection to use regular HTML forms. The frontend is in `static/index.html`. Signup and login use POST, and input names match Python's `Form(...)` arguments. They print dictionaries in the server terminal for now; passwords are redacted and nothing is saved. I'll add the database/auth code inside those functions. Journals is back to your original + placeholder so you can build it; the `/api/journals` backend handler is ready when you are. There's no CSS or JS right now, and submitting goes to a JSON receipt page. Let's keep form actions and input names agreed with the backend.
+References: [FastAPI password hashing](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#password-hashing), [pwdlib hash verification](https://frankie567.github.io/pwdlib/reference/pwdlib/).

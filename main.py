@@ -1,11 +1,24 @@
 from pathlib import Path
 
-from fastapi import FastAPI, Form
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Form, HTTPException
+from fastapi.responses import FileResponse, JSONResponse
+from psycopg import Error
+from psycopg.errors import UniqueViolation
+
+from backend.db import check_login, insert_user
 
 
 app = FastAPI()
-HTML_FILE = Path(__file__).resolve().parent / "static" / "index.html"
+HTML_FILE = "static" / "index.html"
+
+
+@app.exception_handler(Error)
+def handle_database_error(request, error):
+    # Keep database connection details out of the response.
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "Database unavailable. Check SUPABASE_DB_URL in .env and try again."},
+    )
 
 
 @app.get("/")
@@ -14,25 +27,24 @@ async def read_index():
 
 
 @app.post("/api/signup")
-async def handle_signup(
-    name: str = Form(...),
-    email: str = Form(...),
-    password: str = Form(...),
-):
-    # Form(...) reads the inputs whose HTML name attributes match these arguments.
-    # The password is received, but masked in terminal output.
-    user_data = {"name": name, "email": email, "password": "[redacted]"}
-    print("Received Signup Dictionary:", user_data, flush=True)
-    # Add your account-creation code here later.
-    return {"message": "Signup inputs received. Check your terminal; nothing was saved."}
+def handle_signup(name: str = Form(...), email: str = Form(...), password: str = Form(...)):
+    """ Stores the users information into the database """
+
+    if not name.strip() or not email.strip():
+        raise HTTPException(status_code=400, detail="Name and email cannot be blank.")
+    try:
+        insert_user(name, email, password)
+    except UniqueViolation:
+        raise HTTPException(status_code=409, detail="That name or email is already registered.")
+    return {"message": "Signup successful. You can now log in."}
 
 
 @app.post("/api/login")
-async def handle_login(email: str = Form(...), password: str = Form(...)):
-    user_data = {"email": email, "password": "[redacted]"}
-    print("Received Login Dictionary:", user_data, flush=True)
-    # Add your authentication code here later. This does not log anyone in yet.
-    return {"message": "Login inputs received. Check your terminal; login is not active yet."}
+def handle_login(email: str = Form(...), password: str = Form(...)):
+    """ Checks if the users password matches the stored users hashed password """
+    if not check_login(email, password):
+        raise HTTPException(status_code=401, detail="Incorrect email or password.")
+    return {"message": "Login successful"}
 
 
 @app.post("/api/journals")
@@ -43,13 +55,5 @@ async def handle_journal(
     quality: int = Form(...),
     notes: str = Form(""),
 ):
-    journal_data = {
-        "sleep_date": sleep_date,
-        "bedtime": bedtime,
-        "wake_time": wake_time,
-        "quality": quality,
-        "notes": notes,
-    }
-    print("Received Journal Dictionary:", journal_data, flush=True)
     # Add your database insert here later.
-    return {"message": "Journal inputs received. Check your terminal; nothing was saved."}
+    return {"message": "Journal inputs received. Nothing was saved."}
