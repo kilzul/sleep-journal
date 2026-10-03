@@ -2,6 +2,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Form, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from psycopg import Error
 from psycopg.errors import UniqueViolation
 
@@ -10,6 +11,7 @@ from backend.db import check_login, insert_user
 
 app = FastAPI()
 HTML_FILE = Path(__file__).resolve().parent / "static" / "index.html"
+app.mount("/static", StaticFiles(directory=HTML_FILE.parent), name="static")
 
 
 @app.exception_handler(Error)

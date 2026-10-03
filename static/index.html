@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sleep Journal</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
 
     <p class="demo-notice">Sign up, then log in with your email and password.</p>
 
-    <div id="navbar">  
+    <div id="navbar">
         <span class="selector" id="overview-selector">Overview</span>
         <span class="selector" id="journals-selector">Journals</span>
         <span class="selector" id="calendar-selector">Calendar</span>
@@ -97,7 +98,7 @@
         <span id="search-journals"></span>
         <span id="add-journal-button">+</span>
         <div id="journals-container"></div>
-            <!-- journals go here, will write a function that puts there here with a html card format in the javascript -->
+            <!-- journals go here, will write a function that puts them here with a html card format in the javascript -->
 
     </section>
 
@@ -115,6 +116,29 @@
         <div class="page-title" id="statistics-title">Statistics</div>
         <div id="statistics-container">
             <!-- will put your graphs and stuff here -->
+        </div>
+
+    </section>
+
+
+    <section id="settings-page">
+
+        <div id="settings-title">Settings</div>
+        <div id="settings-container">
+            <button id="change-name-button">Change Name</button>
+            <button id="sign-out-button">Sign Out</button>
+            <button id="delete-account-button">Delete Account</button>
+        </div>
+
+    </section>
+
+    <section id="bottom">
+
+        <div id="footer">
+            <span class="bubble" id="creator-1-bubble">Raheil Bryce</span>
+            <span class="bubble" id="creator-2-bubble">Eli Levasseur</span>
+            <p>© 2026 Sleep Journal. All rights reserved.</p>
+            <span class="bubble" id="settings">Settings</span>
         </div>
 
     </section>
