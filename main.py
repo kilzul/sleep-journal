@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI, Form, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.staticfiles import StaticFiles 
 from psycopg import Error
 from psycopg.errors import UniqueViolation
 
@@ -12,7 +13,12 @@ from backend.db import check_login, insert_user
 app = FastAPI()
 HTML_FILE = Path(__file__).resolve().parent / "static" / "index.html"
 app.mount("/static", StaticFiles(directory=HTML_FILE.parent), name="static")
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+HTML_FILE = STATIC_DIR / "index.html"
 
+app.mount("/css", StaticFiles(directory=STATIC_DIR / "css"), name="css")
+app.mount("/js", StaticFiles(directory=STATIC_DIR / "js"), name="js")
 
 @app.exception_handler(Error)
 def handle_database_error(request, error):
