@@ -41,6 +41,9 @@ button {
 
 #bottom {
     position: fixed;
+    min-height: 60px;
+    max-height: 150px;
+    min-width: 200px;
     bottom: 0;
     left: 90px;
 }
@@ -121,7 +124,7 @@ button {
     cursor: default;
 }
 #navbar:hover {
-    width: 250px;
+    width: 252px;
     transition: 0.6s ease;
 }
 
@@ -146,11 +149,112 @@ button {
     font-weight: 500;
 }
 
+/* Link Bubbles */
+
+.creators-section {
+    position: relative;
+    display: flex;
+    gap: 14px;
+}
+
+.icon-group {
+    position: relative;
+}
+
+.creators-section .icon {
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: #1a1a2e;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: inherit;
+    font-size: 1.1rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.creators-section .icon:hover,
+.creators-section .icon:focus-visible,
+.creators-section .icon[aria-expanded="true"] {
+    color: #fff;
+    transform: translateY(-6px) rotate(-8deg);
+}
+
+.creators-section .icon i,
+.creators-section .icon svg {
+    position: relative;
+    z-index: 1;
+}
+
+.creators-section .icon::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: scale(0);
+    border-radius: 50%;
+    transition: transform 0.35s ease;
+}
+
+.creators-section .icon:hover::before,
+.creators-section .icon:focus-visible::before,
+.creators-section .icon[aria-expanded="true"]::before {
+    transform: scale(1);
+}
+
+.gh::before    { background-color: #000; }
+.li::before    { background-color: #0a66c2; }
+.email::before { background-color: #444343; }
+
+/* Starter menu styling (restyle however you like) */
+.link-menu {
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 0;
+    z-index: 10;
+    min-width: 150px;
+    margin: 0;
+    padding: 8px;
+    list-style: none;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.link-menu a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #1a1a2e;
+    text-decoration: none;
+    font-family: DynaPuff-Bold;
+}
+
+.link-menu a:hover,
+.link-menu a:focus-visible {
+    background: #eef1f4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .creators-section .icon,
+    .creators-section .icon::before {
+        transition: none;
+    }
+}
+
+
 /* Login page */
 
 #log-in-page {
     width: 20rem;
-    height: 31rem;
+    height: 33rem;
     background-color: #43b2ce;
     border-color: #fff;
     border-style: transparent;
@@ -166,6 +270,8 @@ button {
     margin-bottom: 24px;
 
 }
+
+
 
 label {
     font-family: DynaPuff-Bold;
@@ -228,7 +334,7 @@ input:hover {
 }
 
 #sign-up-button {
-    margin-top: 0.5rem;
+    margin-top: 0.1rem;
 }
 
 .error, .success {
@@ -236,6 +342,28 @@ input:hover {
     font-size: 12px;
     margin: 0;
     font-family: Chewy;
+}
+
+.shake {
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-6px);
+    }
+    50% {
+        transform: translateX(6px);
+    }
+    75% {
+        transform: translateX(-6px)
+    }
+    100% {
+        transform: translateX(0)
+    }
 }
 
 .box {
@@ -267,3 +395,6 @@ input:hover {
     color: #0f7535;
 }
 
+#password-box {
+    margin-bottom: 30px;
+}
