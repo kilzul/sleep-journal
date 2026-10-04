@@ -258,12 +258,12 @@ input:hover {
 }
 
 .form-group:has(input:valid:not(:placeholder-shown)) input {
-    border-color: #08c14c;
+    border-color: #0f7535;
 }
 
 .form-group:has(input:valid:not(:placeholder-shown)) .success {
     position: fixed;
     display: block;
-    color: #08c14c;
+    color: #0f7535;
 }
 

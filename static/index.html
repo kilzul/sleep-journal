@@ -74,8 +74,8 @@
                             <label id="name-label" for="Name">Name:</label>
                             <div class="box">
                                 <input type="text" placeholder="What name can we call you?" aria-placeholder="Enter your name" id="name" name="name" required>
+                                <p class="success">Nice to meet you, </p>
                             </div>
-                            <p class="success">Nice to meet you, </p>
                         </div>
                         <div class="form-group">
                             <label id="email-label" for="email">Email:</label>
@@ -89,17 +89,17 @@
                             <label id="password-label" for="password">Password:</label>
                             <div class="box">
                                 <input placeholder="Create a password" aria-placeholder="password" type="password" id="sign-up-password" name="password" required>
+                                <p class="success">Nice! Cool password! (Don't worry. We won't tell anyone.)</p>
+                                <p class="error">Sorry, your password has to be at least 12 characters, with an uppercase and a lowercase letter.</p>
                             </div>
-                            <p class="success">Nice! Cool password! (Don't worry. We won't tell anyone.)</p>
-                            <p class="error">Sorry, your password has to be at least 12 characters, with an uppercase and a lowercase letter.</p>
                         </div>
                         <div class="form-group">
                             <label id="confirm-label" for="password">Confirm Password:</label>
                             <div class="box">
                                 <input placeholder="Now write it again!" aria-placeholder="confirm password" type="password" id="confirm-password" required>
+                                <p class="success">Perfect! Looks the same to me!</p>
+                                <p class="error">Wait a minute... these passwords don't match!</p>
                             </div>
-                            <p class="success">Perfect! Looks the same to me!</p>
-                            <p class="error">Wait a minute... these passwords don't match!</p>
                         </div>
                         <button id="sign-up-button">Let's get started!</button>
                     </form>
