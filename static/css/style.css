@@ -1,0 +1,269 @@
+
+/* General stuff */
+
+[hidden] { 
+    display: none !important; 
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    
+}
+
+@font-face {
+    font-family: DynaPuff-Bold;
+    src: url(../fonts/DynaPuff-Bold.ttf);
+}
+
+@font-face {
+    font-family: Chewy;
+    src: url(../fonts/Chewy-Regular.ttf);
+}
+
+html {
+    background: #7ee5ff;
+}
+
+body {
+    background-color: #7ee5ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+
+}
+
+button {
+    cursor: pointer;
+}
+
+#bottom {
+    position: fixed;
+    bottom: 0;
+    left: 90px;
+}
+
+
+#footer {
+    font-family: DynaPuff-Bold;
+    position: fixed;
+    bottom: 0;
+    right: 10px;
+}
+
+/* Sidebar */
+
+.selector {
+    list-style-type: none;
+    list-style: none;
+    margin: 5% 0;
+}
+
+#navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translate(5px, 5px);
+    height: 99%;
+    width: 75px;
+    z-index: 1;
+    background: #2faac9;
+    overflow-x: hidden;
+    padding-top: 0.5%;
+    transition: 0.6s ease;
+    box-shadow: 0 0 0.5% #000000;
+    border-radius: 35px 35px 35px 35px;
+}
+
+#navbar::-webkit-scrollbar {
+    display: none;
+}
+
+#navbar ul {
+    position: relative;
+    height: 97vh;
+}
+
+.selector div {
+    position: relative;
+    display: flex;
+    white-space: nowrap;
+    color: #000000;
+}
+
+#logo {
+    margin-bottom: 80px;
+}
+
+#app-name {
+    font-family: DynaPuff-Bold;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#navbar ul li:last-child {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+#sleep-profile {
+    margin-top: 150px;
+}
+
+.selector:hover {
+    cursor: pointer;
+}
+
+#logo {
+    cursor: default;
+}
+#navbar:hover {
+    width: 250px;
+    transition: 0.6s ease;
+}
+
+.sidebar-icon {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 75px;
+    height: 60px;
+    font-size: 22px;
+}
+
+.selector-text {
+    font-family: DynaPuff-Bold;
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 60px;
+    font-size: 16px;
+    letter-spacing: 0.6px;
+    font-weight: 500;
+}
+
+/* Login page */
+
+#log-in-page {
+    width: 20rem;
+    height: 31rem;
+    background-color: #43b2ce;
+    border-color: #fff;
+    border-style: transparent;
+    border-width: 10px;
+    padding: 1rem;
+    border-radius: 35px;
+}
+
+#log-in-title-text {
+    font-family: DynaPuff-Bold;
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-bottom: 24px;
+
+}
+
+label {
+    font-family: DynaPuff-Bold;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+input {
+    width: 17rem;
+    background-color: #fff;
+    border: 2px #000 solid;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #000;
+    margin: 20px 5px;
+    outline: none;
+}
+
+input:hover {
+    outline: none;
+    border-color: #7ee5ff;
+
+}
+
+.form button {
+    font-family: DynaPuff-Bold;
+    width: 18rem;
+    height: 3rem;
+    background-color: #7ee5ff;
+    outline: none;
+    border: none;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.form button:hover {
+    border: 3px #fff solid;
+    transform: scale(1.05);
+}
+
+/* Sign up page */
+
+#sign-up-page {
+    width: 20rem;
+    height: 43rem;
+    background-color: #43b2ce;
+    border-color: #fff;
+    border-style: transparent;
+    border-width: 10px;
+    padding: 1rem;
+    border-radius: 35px;
+}
+
+#sign-up-title-text {
+    font-family: DynaPuff-Bold;
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-bottom: 24px;
+
+}
+
+#sign-up-button {
+    margin-top: 0.5rem;
+}
+
+.error, .success {
+    display: none;
+    font-size: 12px;
+    margin: 0;
+    font-family: Chewy;
+}
+
+.box {
+    margin-bottom: 20px;
+}
+
+#sign-up-form input {
+    margin-bottom: 10px;
+    padding: 8px 16px;
+}
+
+.form-group:has(input:invalid:not(:placeholder-shown)) input {
+    border-color: red;
+}
+
+.form-group:has(input:invalid:not(:placeholder-shown)) .error {
+    position: fixed;
+    display: block;
+    color: red;
+}
+
+.form-group:has(input:valid:not(:placeholder-shown)) input {
+    border-color: #08c14c;
+}
+
+.form-group:has(input:valid:not(:placeholder-shown)) .success {
+    position: fixed;
+    display: block;
+    color: #08c14c;
+}
+
