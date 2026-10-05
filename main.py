@@ -19,6 +19,7 @@ HTML_FILE = STATIC_DIR / "index.html"
 
 app.mount("/css", StaticFiles(directory=STATIC_DIR / "css"), name="css")
 app.mount("/js", StaticFiles(directory=STATIC_DIR / "js"), name="js")
+app.mount("/fonts", StaticFiles(directory=STATIC_DIR / "fonts"), name="fonts")
 
 @app.exception_handler(Error)
 def handle_database_error(request, error):
