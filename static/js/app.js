@@ -92,9 +92,9 @@ const signUpName = document.getElementById("name");
 const signUpPasswordInput = document.getElementById("sign-up-password");
 const confirmInput = document.getElementById("confirm-password");
 
-signUpForm.addEventListener("submit", (event) => {
+signUpForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    let firstInvalid;
+    let firstInvalid = null;
 
     if (!signUpForm.checkValidity()) {
         firstInvalid = signUpForm.querySelector(":invalid");
@@ -104,7 +104,31 @@ signUpForm.addEventListener("submit", (event) => {
 
     firstInvalid.addEventListener("animationend", () => {
         firstInvalid.classList.remove("shake");
-    })
+    }); 
+
+    if (!signUpForm.reportValidity()) return;
+
+    try {
+        const res = await fetch("/api/signup", {
+            method: "POST",
+            body: new FormData(signUpForm)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            // add signup error message field
+            return;
+        }
+
+        loggedIn = true;
+
+        showPage(document.getElementById("overview-page"));
+
+        //  success message
+    } catch {
+        // server error message
+    }
 
 });
 
