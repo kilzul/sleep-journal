@@ -1,12 +1,18 @@
 
 
+const protectedPages = ["overview-page", "journals-page", "calendar-page", "statistics-page", "settings-page"];
+const logInNotice = document.getElementById("log-in-notice");
+
+const wantedPageNames = { 
+
+}
 
 const pages = document.querySelectorAll(".page");
+let wantedPage = null;
 
-function showPage(page) {
-    pages.forEach(p => p.hidden = true);
-    page.hidden = false;
 
+function isLoggedIn() {
+    return Boolean(localStorage.getItem("token"));
 }
 
 const iconGroups = document.querySelectorAll(".icon-group");
@@ -32,6 +38,7 @@ iconGroups.forEach(g => {
     });
 });
 
+
 document.addEventListener("click", (event) => {
     if (!event.target.closest(".icon-group")) closeMenus();
 });
@@ -43,6 +50,28 @@ document.addEventListener("keydown", (event) => {
         if (openButton) openButton.focus();
     }
 });
+
+const overviewButton = document.getElementById("overview-button");
+const journalsButton = document.getElementById("journals-button");
+const calendarButton = document.getElementById("calendar-button");
+const statsButton = document.getElementById("stats-button");
+
+overviewButton.addEventListener("click", () => {
+    showPage(document.getElementById("overview-page"));
+});
+
+journalsButton.addEventListener("click", () => {
+    showPage(document.getElementById("journals-page"));
+});
+
+calendarButton.addEventListener("click", () => {
+    showPage(document.getElementById("calendar-page"));
+});
+
+statsButton.addEventListener("click", () => {
+    showPage(document.getElementById("statistics-page"));
+});
+
 
 
 
@@ -115,6 +144,37 @@ confirmInput.addEventListener("input", () => {
 const loginForm = document.getElementById("log-in-form");
 const loginEmail = document.getElementById("login-email");
 const loginPassword = document.getElementById("log-in-password");
+
+// router function
+function showPage(page) {
+    let shouldShake = false;
+
+    if (protectedPages.includes(page.id) && !isLoggedIn()) {
+        shouldShake = wantedPage === page && !loginForm.hidden;
+        wantedPage = page;
+        const title = page.querySelector(".page-title");
+        logInNotice.textContent = "Sorry, but you have to log in to see your " + title.textContent + ".";
+        page = document.getElementById("log-in-page");
+    } else {
+        logInNotice.textContent = "";
+    }
+
+    pages.forEach(p => p.hidden = true);
+    page.hidden = false;
+
+    if (shouldShake) shake(logInNotice);
+
+}
+
+logInNotice.addEventListener("animationend", () => {
+    logInNotice.classList.remove("shake");
+});
+
+function shake(el) {
+    el.classList.remove("shake");
+    void el.offsetWidth;
+    el.classList.add("shake");
+}
 
 
 

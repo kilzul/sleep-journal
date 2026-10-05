@@ -271,6 +271,12 @@ button {
 
 }
 
+#log-in-notice {
+    font-family: Chewy;
+    color: red;
+    font-size: 0.8rem;
+}
+
 
 
 label {
@@ -310,6 +316,10 @@ input:hover {
 .form button:hover {
     border: 3px #fff solid;
     transform: scale(1.05);
+}
+
+#idhaa {
+    margin-bottom: 40px;
 }
 
 /* Sign up page */
@@ -363,6 +373,12 @@ input:hover {
     }
     100% {
         transform: translateX(0)
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shake {
+        animation: none;
     }
 }
 
