@@ -94,7 +94,7 @@ const confirmInput = document.getElementById("confirm-password");
 
 signUpForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    let firstInvalid;
+    let firstInvalid = null;
 
     if (!signUpForm.checkValidity()) {
         firstInvalid = signUpForm.querySelector(":invalid");
