@@ -10,10 +10,7 @@ const wantedPageNames = {
 const pages = document.querySelectorAll(".page");
 let wantedPage = null;
 
-
-function isLoggedIn() {
-    return Boolean(localStorage.getItem("token"));
-}
+let loggedIn = false;
 
 const iconGroups = document.querySelectorAll(".icon-group");
 
@@ -149,7 +146,7 @@ const loginPassword = document.getElementById("log-in-password");
 function showPage(page) {
     let shouldShake = false;
 
-    if (protectedPages.includes(page.id) && !isLoggedIn()) {
+    if (protectedPages.includes(page.id) && !loggedIn) {
         shouldShake = wantedPage === page && !loginForm.hidden;
         wantedPage = page;
         const title = page.querySelector(".page-title");
@@ -176,6 +173,63 @@ function shake(el) {
     el.classList.add("shake");
 }
 
+loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault(); 
+
+    if (!loginForm.reportValidity()) return;
+
+    try {
+        const res = await fetch("/api/login", {
+            method: "POST",
+            body: new FormData(loginForm) 
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+            logInNotice.textContent = "Hmm... that didn't work. Maybe try a different password.";
+            return;
+        }
+
+        loggedIn = true;
+
+        const nextPage = wantedPage || document.getElementById("overview-page");
+
+        wantedPage = null;
+        showPage(nextPage);
+    } catch {
+        logInNotice.textContent = "Sorry, I think the server may be down. Try again later.";
+    }
+
+});
+
+async function restoreLogin() {
+    try {
+        const res = await fetch("/api/me");
+
+        if (res.status === 401) {
+            loggedIn = false;
+            showPage(document.getElementById("log-in-page"));
+            return;
+        }
+
+        if (!res.ok) {
+            logInNotice.textContent = "Sorry, you got logged out. Could you pretty pleaseee log back in?";
+            return;
+        }
+
+        loggedIn = true;
+
+        const nextPage = wantedPage || document.getElementById("overview-page");
+
+        wantedPage = null;
+        showPage(nextPage);
+    } catch {
+        logInNotice.textContent = "Sorry, I think the server may be down. Try again later.";
+    }
+}
+
+restoreLogin();
 
 
 
