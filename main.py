@@ -1,13 +1,16 @@
 from pathlib import Path
 
-from fastapi import FastAPI, Form, HTTPException
+from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.staticfiles import StaticFiles 
 from psycopg import Error
 from psycopg.errors import UniqueViolation
 
-from backend.db import check_login, insert_user
+from backend.db import authenticate_user, insert_user
+from backend.sessions import (
+    COOKIE_NAME, COOKIE_SECURE, create_session, get_current_user,
+    revoke_session, set_session_cookie, verify_request_origin,
+)
 
 
 app = FastAPI()
@@ -19,6 +22,8 @@ HTML_FILE = STATIC_DIR / "index.html"
 
 app.mount("/css", StaticFiles(directory=STATIC_DIR / "css"), name="css")
 app.mount("/js", StaticFiles(directory=STATIC_DIR / "js"), name="js")
+app.mount("/fonts", StaticFiles(directory=STATIC_DIR / "fonts"), name="fonts")
+
 
 @app.exception_handler(Error)
 def handle_database_error(request, error):
@@ -35,7 +40,7 @@ async def read_index():
 
 
 @app.post("/api/signup")
-def handle_signup(name: str = Form(...), email: str = Form(...), password: str = Form(...)):
+def handle_signup(name: str = Form(...), email: str = Form(...), password: str = Form(...), _origin=Depends(verify_request_origin)):
     """ Stores the users information into the database """
 
     if not name.strip() or not email.strip():
@@ -48,11 +53,31 @@ def handle_signup(name: str = Form(...), email: str = Form(...), password: str =
 
 
 @app.post("/api/login")
-def handle_login(email: str = Form(...), password: str = Form(...)):
+def handle_login(request: Request, response: Response, email: str = Form(...), password: str = Form(...), _origin=Depends(verify_request_origin)):
     """ Checks if the users password matches the stored users hashed password """
-    if not check_login(email, password):
-        raise HTTPException(status_code=401, detail="Incorrect email or password.")
-    return {"message": "Login successful"}
+    user = authenticate_user(email, password)
+    if not user:
+        return JSONResponse(status_code=401, content={"success": False, "message": "Incorrect email or password."})
+    token, expires_at = create_session(user["id"], request.cookies.get(COOKIE_NAME))
+    set_session_cookie(response, token, expires_at)
+    response.headers["Cache-Control"] = "no-store"
+    return {"success": True, "message": "Login successful", "user": user}
+
+
+@app.get("/api/me")
+def handle_me(response: Response, user: dict = Depends(get_current_user)):
+    response.headers["Cache-Control"] = "no-store"
+    return {"user": user}
+
+
+@app.post("/api/logout")
+def handle_logout(request: Request, response: Response, _origin=Depends(verify_request_origin)):
+    token = request.cookies.get(COOKIE_NAME)
+    if token:
+        revoke_session(token)
+    response.delete_cookie(COOKIE_NAME, path="/", secure=COOKIE_SECURE, httponly=True, samesite="lax")
+    response.headers["Cache-Control"] = "no-store"
+    return {"success": True, "message": "Logged out"}
 
 
 @app.post("/api/journals")
@@ -62,6 +87,8 @@ async def handle_journal(
     wake_time: str = Form(...),
     quality: int = Form(...),
     notes: str = Form(""),
+    user: dict = Depends(get_current_user),
+    _origin=Depends(verify_request_origin),
 ):
     # Add your database insert here later.
     return {"message": "Journal inputs received. Nothing was saved."}

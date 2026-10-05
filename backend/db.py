@@ -31,19 +31,25 @@ def insert_user(name: str, email: str, password: str) -> None:
             )
 
 
-def check_login(email: str, password: str) -> bool:
+def authenticate_user(email: str, password: str) -> dict | None:
     with connect_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT password_hash FROM public.users WHERE email = %s",
+                "SELECT id, username, email, password_hash FROM public.users WHERE email = %s",
                 (email.strip().lower(),),
             )
             user = cur.fetchone()
 
-    stored_hash = user[0] if user and user[0] else DUMMY_PASSWORD_HASH
+    stored_hash = user[3] if user and user[3] else DUMMY_PASSWORD_HASH
     try:
         password_matches = password_hasher.verify(password, stored_hash)
     except UnknownHashError:
-        return False
+        return None
 
-    return bool(user and user[0] and password_matches)
+    if not user or not user[3] or not password_matches:
+        return None
+    return {"id": user[0], "username": user[1], "email": user[2]}
+
+
+def check_login(email: str, password: str) -> bool:
+    return authenticate_user(email, password) is not None
