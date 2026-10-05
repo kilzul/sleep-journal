@@ -99,11 +99,15 @@ signUpForm.addEventListener("submit", async (event) => {
         const firstInvalid = signUpForm.querySelector(":invalid");
         firstInvalid.classList.add("shake");
         firstInvalid.focus();
+
+        firstInvalid.addEventListener("animationend", () => {
+        firstInvalid.classList.remove("shake");
+        }, { once: true });
+        signUpForm.reportValidity();
+        return; 
     }
 
-    firstInvalid.addEventListener("animationend", () => {
-        firstInvalid.classList.remove("shake");
-    }); 
+
 
     if (!signUpForm.reportValidity()) return;
 
@@ -122,9 +126,10 @@ signUpForm.addEventListener("submit", async (event) => {
 
         loggedIn = true;
 
-        showPage(document.getElementById("overview-page"));
 
-        //  success message
+        loginEmail.value = document.getElementById("email").value;
+        showPage(document.getElementById("log-in-page"));
+        logInNotice.textContent = "Yay! You have an account! Now try logging in!";
     } catch {
         // server error message
     }
