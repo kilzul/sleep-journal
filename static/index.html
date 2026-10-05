@@ -70,12 +70,12 @@
                 </div>
                 <div class="form">
                     <form id="sign-up-form" action="/api/signup" method="POST" novalidate>
-                        <div class="form-group">
+                        <div class="form-group" id="name-form-group">
                             <label id="name-label" for="Name">Name:</label>
                             <div class="box">
                                 <input type="text" placeholder="What name can we call you?" aria-placeholder="Enter your name" id="name" name="name" required>
+                                <p class="success">Nice to meet you, </p>
                             </div>
-                            <p class="success">Nice to meet you, </p>
                         </div>
                         <div class="form-group">
                             <label id="email-label" for="email">Email:</label>
@@ -87,19 +87,19 @@
                         </div>
                         <div class="form-group">
                             <label id="password-label" for="password">Password:</label>
-                            <div class="box">
+                            <div class="box" id="password-box">
                                 <input placeholder="Create a password" aria-placeholder="password" type="password" id="sign-up-password" name="password" required>
+                                <p class="success">Nice! Cool password! (Don't worry. We won't tell anyone.)</p>
+                                <p class="error">Sorry, your password has to be at least 12 characters, with an <br>uppercase and a lowercase letter.</p>
                             </div>
-                            <p class="success">Nice! Cool password! (Don't worry. We won't tell anyone.)</p>
-                            <p class="error">Sorry, your password has to be at least 12 characters, with an uppercase and a lowercase letter.</p>
                         </div>
                         <div class="form-group">
                             <label id="confirm-label" for="password">Confirm Password:</label>
                             <div class="box">
                                 <input placeholder="Now write it again!" aria-placeholder="confirm password" type="password" id="confirm-password" required>
+                                <p class="success">Perfect! Looks the same to me!</p>
+                                <p class="error">Wait a minute... these passwords don't match!</p>
                             </div>
-                            <p class="success">Perfect! Looks the same to me!</p>
-                            <p class="error">Wait a minute... these passwords don't match!</p>
                         </div>
                         <button id="sign-up-button">Let's get started!</button>
                     </form>
@@ -115,19 +115,29 @@
                     <h3 id="log-in-title-text">Already have a Snoozely account?</h3>
                 </div>
                 <div class="form">
-                    <form id="log-in-form" action="/api/login" method="POST">
+                    <form id="log-in-form" action="/api/login" method="POST" novalidate>
                         <div class="form-group">
                             <label id="email-label" for="email">Enter your email:</label>
-                            <input type="email" placeholder="What's your email?" aria-placeholder="Please enter your email" id="name" name="email" required>
+                            <div class="box" id="login-box">
+                                <input type="email" placeholder="What's your email?" aria-placeholder="Please enter your email" id="login-email" name="email" required>
+                                <p class="success">That's more like it!</p>
+                                <p class="error">That's not an email...</p>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label id="password-label" for="password">Enter your password:</label>
-                            <input type="password" placeholder="What's your password?" aria-placeholder="password" id="log-in-password" name="password" required>
+                            <div class="box">
+                                <input type="password" placeholder="What's your password?" aria-placeholder="password" id="log-in-password" name="password" required>
+                            </div>
                         </div>
                         <button id="log-in-button" type="submit">Log In</button>
                     </form>
                     <button id="idhaa">I don't have an account</button>
                 </div>
+
+                <p id="log-in-notice"></p>
+
+
 
             </section>
 
@@ -141,7 +151,7 @@
 
             <section data-route="overview" class="page" id="overview-page" hidden>
 
-                <div class="page-title" id="overview-title">Overview</div>
+                <div class="page-title">Overview</div>
 
 
                 <div id="bedtime-timer" class="data-card">
@@ -177,7 +187,7 @@
 
             <section data-route="journals" class="page" id="journals-page" hidden>
 
-                <div class="page-title" id="journals-title">Journals</div>
+                <div class="page-title" id="journals-title"><p id="page-title">Journals</p></div>
                 <span id="search-journals"></span>
                 <span id="add-journal-button">+</span>
                 <div id="journals-container"></div>
@@ -188,7 +198,7 @@
 
             <section data-route="calendar" class="page" id="calendar-page" hidden>
 
-                <div class="page-title" id="calendar-title">Calendar</div>
+                <div class="page-title" id="calendar-title"><p id="page-title">Calendar</p></div>
                 <div id="calendar-container">
                     <!-- will have to figure out a function to make a calendar here, or call an api or summ -->
                 </div>
@@ -197,7 +207,7 @@
 
             <section data-route="stats" class="page" id="statistics-page" hidden>
 
-                <div class="page-title" id="statistics-title">Statistics</div>
+                <div class="page-title" id="statistics-title"><p id="page-title">Statistics</p></div>
                 <div id="statistics-container">
                     <!-- will put your graphs and stuff here -->
                 </div>
@@ -206,7 +216,7 @@
 
             <section data-route="settings" id="settings-page" hidden>
 
-                <div id="settings-title">Settings</div>
+                <p id="page-title settings-title">Settings</p>
                 <div id="settings-container">
                     <button id="change-name-button">Change Name</button>
                     <button id="sign-out-button">Sign Out</button>
@@ -217,9 +227,50 @@
 
             <section id="bottom">
 
-                <div id="crators-section">
-                    <span class="bubble" id="creator-1-bubble">Raheil Bryce</span>
-                    <span class="bubble" id="creator-2-bubble">Eli Levasseur</span>
+                <div class="creators-section" id="creators-section">
+
+                    <div class="icon-group githubs">
+                        <button type="button" class="icon gh" aria-label="GitHub links" aria-expanded="false" aria-controls="github-menu">
+                            <i class="fa-brands fa-github" aria-hidden="true"></i>
+                        </button>
+                        <ul class="link-menu" id="github-menu" hidden>
+                            <li>
+                                <a href="#creator1" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a>
+                            </li>
+                            <li>
+                                <a href="#creator2" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="icon-group linkedins">
+                        <button type="button" class="icon li" aria-label="LinkedIn links" aria-expanded="false" aria-controls="linkedin-menu">
+                            <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+                        </button>
+                        <ul class="link-menu" id="linkedin-menu" hidden>
+                            <li>
+                                <a href="#creator1" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a>
+                            </li>
+                            <li>
+                                <a href="#creator2" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="icon-group email">
+                        <button type="button" class="icon email" aria-label="Email" aria-expanded="false" aria-controls="email-menu">
+                            <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                        </button>
+                        <ul class="link-menu" id="email-menu" hidden>
+                            <li>
+                                <a href="#creator1" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a>
+                            </li>
+                            <li>
+                                <a href="#creator2" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a>
+                            </li>
+                        </ul>
+                    </div> 
+
                 </div>
 
                 <div id="footer">
@@ -230,6 +281,12 @@
 
         </main>
         
+    </div>
+
+    <div class="menus">
+        <div id="github-menu">
+
+        </div>
     </div>
 
     <script type="module" src="./js/app.js"></script>
