@@ -11,8 +11,7 @@ export async function api(path, options = {}) {
 
     const res = await fetch(BASE + path, {
         ...options,
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
+        credentials: "same-origin"
     });
 
     if (!res.ok) {

@@ -1,6 +1,6 @@
-import { api } from "./api.fake.js"; // will switch this to api.js when the endpoints r up
+import { api } from "./api.js"; // will switch this to api.js when the endpoints r up
 
-const DEV_BYPASS = true; // will delete this before merging or will make false;
+const DEV_BYPASS = false; // will delete this before merging or will make false;
 
 const protectedPages = ["overview-page", "journals-page", "journal-form", "calendar-page", "statistics-page", "settings-page"];
 const pages = document.querySelectorAll(".page");
@@ -462,8 +462,10 @@ entryForm.addEventListener("submit", async (event) => {
         return;
     }
 
-    const data = Object.fromEntries(new FormData(entryForm));
-    data.quality = Number(data.quality);
+    await api("/entries", {
+        method: "POST",
+        body: new FormData(entryForm)
+    });
 
     try {
         await api("/entries", { method: "POST", body: JSON.stringify(data) });
