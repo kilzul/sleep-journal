@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import psycopg
+from psycopg.rows import dict_row
 from dotenv import load_dotenv
 from pwdlib import PasswordHash
 from pwdlib.exceptions import UnknownHashError
@@ -53,3 +54,44 @@ def authenticate_user(email: str, password: str) -> dict | None:
 
 def check_login(email: str, password: str) -> bool:
     return authenticate_user(email, password) is not None
+
+
+def insert_journal(user_id, sleep_date, bedtime, wake_time, quality, notes):
+    """Save a journal and return the fields used by the frontend's cards."""
+    with connect_db() as conn:
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """INSERT INTO public.journals
+                       (user_id, sleep_date, bedtime, wake_time, quality, notes)
+                   VALUES (%s, %s, %s, %s, %s, %s)
+                   RETURNING id, sleep_date, bedtime::time AS bedtime,
+                             wake_time::time AS wake_time, quality, notes""",
+                (user_id, sleep_date, bedtime, wake_time, quality, notes),
+            )
+            return cur.fetchone()
+
+
+def get_user_journals(user_id):
+    """Return only this user's journals, with the newest sleep date first."""
+    with connect_db() as conn:
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """SELECT id, sleep_date, bedtime::time AS bedtime,
+                          wake_time::time AS wake_time, quality, notes
+                   FROM public.journals
+                   WHERE user_id = %s
+                   ORDER BY sleep_date DESC, id DESC""",
+                (user_id,),
+            )
+            return cur.fetchall()
+
+
+def delete_journal(user_id, entry_id):
+    """Delete an entry only when it belongs to the session's user."""
+    with connect_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM public.journals WHERE id = %s AND user_id = %s RETURNING id",
+                (entry_id, user_id),
+            )
+            return cur.fetchone() is not None
