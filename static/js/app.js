@@ -1,7 +1,7 @@
-import { api } from "./api.js";
-import { loadStats, clearStats } from "./stats.js";
+import { api } from "./api.fake.js";
+import { loadStats, clearStats, card,  } from "./stats.js";
 
-const DEV_BYPASS = false; // will delete this before merging or will make false;
+const DEV_BYPASS = true; // will delete this before merging or will make false;
 
 const protectedPages = ["overview-page", "journals-page", "journal-form", "calendar-page", "statistics-page", "settings-page"];
 const pages = document.querySelectorAll(".page");
@@ -10,6 +10,36 @@ let wantedPage = null;
 let loggedIn = false;
 
 /* helpers */
+
+const loadingScreen = document.getElementById("loading-screen");
+const loadingText = document.getElementById("loading-text");
+let loadingCount = 0;
+
+async function withLoading(task, message = "Loading...", delay = 0, minShow = 750) {
+    loadingCount++;
+    let shownAt = 0;
+    let timer = null;
+
+    const show = () => {
+        loadingText.textContent = message;
+        loadingScreen.hidden = false;
+        shownAt = Date.now();
+    };
+
+    if (delay > 0) timer = setTimeout(show, delay);
+    else show();
+
+    try {
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timed out")), 15000));
+        return await Promise.race([task(), timeout]);
+    } finally {
+        clearTimeout(timer);
+        const remaining = minShow - (Date.now() - shownAt);
+        if (shownAt && remaining > 0) await new Promise(r => setTimeout(r, remaining));
+        loadingCount--;
+        if (loadingCount === 0) loadingScreen.hidden = true;
+    }
+}
 
 function shake(el) {
     el.classList.remove("shake");
@@ -54,9 +84,10 @@ function showPage(page) {
     page.hidden = false;
 
     if (shouldShake) shake(logInNotice);
-    if (page.id === "journals-page") loadJournals();
-    if (page.id === "settings-page") loadSettings();
-    if (page.id === "statistics-page") loadStats(handleSessionExpired);
+    if (page.id === "journals-page") withLoading(() => loadJournals(), "Loading your journal entries...");
+    if (page.id === "overview-page") withLoading(() => loadOverview(), "Loading your overview...");
+    if (page.id === "settings-page") withLoading(() => loadSettings(), "Loading your settings...");
+    if (page.id === "statistics-page") withLoading(() => loadStats(handleSessionExpired), "Loading your statistics...");
 }
 
 function handleSessionExpired() {
@@ -256,7 +287,7 @@ async function restoreLogin() {
 
 /* journal page */
 
-const journalContainer = document.getElementById("journals-container");
+const journalGrid = document.getElementById("journal-grid");
 const addJournal = document.getElementById("add-journal-button");
 const statusText = document.getElementById("journals-status");
 const journalSearch = document.getElementById("entry-search");
@@ -269,19 +300,29 @@ const qualityIcons = {
     5: "fa-face-grin-stars"
 };
 
-function filterJournals() {
-    const query = journalSearch.value.trim().toLowerCase();
-    const cards = [...journalContainer.querySelectorAll(".journal-card")];
+let journalCards = [];
 
-    cards.forEach(card => {
-        card.hidden = query !== "" && !card.dataset.search.includes(query);
-    });
-
-    if (cards.length === 0) return;
-    statusText.textContent = cards.some(card => !card.hidden) ? "" : "Sorry, we couldn't find that one.";
+function buildPages(cards, keepScroll = false) {
+    const scrollTop = journalGrid.scrollTop;
+    journalGrid.replaceChildren();
+    for (let i = 0; i < cards.length; i += 9) {
+        const page = document.createElement("div");
+        page.className = "journal-page";
+        page.append(...cards.slice(i, i + 9));
+        journalGrid.append(page);
+    }
+    journalGrid.scrollTop = keepScroll ? scrollTop : 0;
 }
 
-journalSearch.addEventListener("input", filterJournals);
+function filterJournals(keepScroll = false) {
+    const query = journalSearch.value.trim().toLowerCase();
+    const matches = journalCards.filter(card => query === "" || card.dataset.search.includes(query));
+    buildPages(matches, keepScroll);
+    if (journalCards.length === 0) return;
+    statusText.textContent = matches.length ? "" : "Sorry, we couldn't find that one.";
+}
+
+journalSearch.addEventListener("input", () => filterJournals());
 
 function createJournalCard(entry) {
     const card = document.createElement("div");
@@ -329,13 +370,13 @@ function createJournalCard(entry) {
 }
 
 function renderEntries(entries) {
-    journalContainer.replaceChildren();
-    if (entries.length === 0) {
+    journalCards = entries.map(createJournalCard);
+    if (journalCards.length === 0) {
+        journalGrid.replaceChildren();
         statusText.textContent = "Make your first entry and we'll show it here!";
         return;
     }
     statusText.textContent = "";
-    journalContainer.append(...entries.map(createJournalCard));
     filterJournals();
 }
 
@@ -353,7 +394,7 @@ async function loadJournals() {
     }
 }
 
-journalContainer.addEventListener("click", async (event) => {
+journalGrid.addEventListener("click", async (event) => {
     const btn = event.target.closest(".delete-entry");
     if (!btn) return;
 
@@ -362,10 +403,12 @@ journalContainer.addEventListener("click", async (event) => {
     try {
         await api("/entries/" + card.dataset.id, { method: "DELETE" });
         card.remove();
-        if (!journalContainer.children.length) {
+        journalCards = journalCards.filter(c => c !== card);
+        if (journalCards.length === 0) {
+            journalGrid.replaceChildren();
             statusText.textContent = "Make your first entry and we'll show it here!";
         } else {
-            filterJournals();
+            filterJournals(true);
         }
     } catch (err) {
         btn.disabled = false;
@@ -457,6 +500,7 @@ entryForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     entryError.textContent = "";
     checkTimes();
+    document.getElementById("save-journal-button").disabled = true;
 
     const invalid = [...entryForm.querySelectorAll("input:invalid, textarea:invalid")];
     invalid.forEach((el) => el.closest(".box").classList.add("invalid"));
@@ -484,7 +528,8 @@ entryForm.addEventListener("submit", async (event) => {
     }
 });
 
-/* Settings */
+/* settings */
+
 const settingsForm = document.getElementById("settings-form");
 const settingsStatus = document.getElementById("settings-status");
 const settingsSave = document.getElementById("save-settings-button");
@@ -580,4 +625,21 @@ deleteForm.addEventListener("submit", async (event) => {
 
 /* on start up */
 
-if (!DEV_BYPASS) restoreLogin();
+
+setTimeout(() => {
+    if (!loadingScreen.hidden) loadingText.textContent = "This is taking too long. Try refreshing the page.";
+}, 20000);
+
+async function startUp() {
+    const slowTimer = setTimeout(() => {
+        loadingText.textContent = "Waking things up... the first load can take a minute.";
+    }, 5000);
+    try {
+        if (!DEV_BYPASS) await restoreLogin();
+    } finally {
+        clearTimeout(slowTimer);
+        loadingScreen.hidden = true;
+    }
+}
+
+startUp();

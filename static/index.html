@@ -9,6 +9,11 @@
 </head>
 <body>
 
+<div id="loading-screen" role="status" aria-live="polite">
+    <i class="fa-solid fa-moon loading-moon" aria-hidden="true"></i>
+    <p id="loading-text">Getting your sleep journal ready...</p>
+</div>
+
 
 <div class="layout">
 
@@ -132,33 +137,11 @@
 
     <section data-route="overview" class="page" id="overview-page" hidden>
       <div class="page-title">Overview</div>
+      <div id="overview-container">
+        <p id="overview-status" role="status" aria-live="polite"></p>
+        <div id="overview-cards" class="stats-grid">
 
-      <div id="bedtime-timer" class="data-card">
-        <p class="data-card-title">Bedtime Timer</p>
-        <div id="bedtime-timer-display">
-          <span id="bedtime-timer-graphic"></span>
-          <span id="bedtime-timer-description"></span>
-          <span id="bedtime-timer-value"></span>
         </div>
-      </div>
-
-      <div id="best-sleep-day" class="data-card">
-        <p class="data-card-title">Best Sleep Day</p>
-        <div id="week-month-year">
-          <span class="best-sleep-day-selector">Week</span>
-          <span class="best-sleep-day-selector">Month</span>
-          <span class="best-sleep-day-selector">Year</span>
-        </div>
-        <div id="best-sleep-day-display">
-          <span id="best-sleep-day-graphic"></span>
-          <span id="best-sleep-day-value"></span>
-        </div>
-      </div>
-
-      <div id="weekly-sleep-average" class="data-card">
-        <p class="data-card-title">Weekly Sleep Average</p>
-        <p class="data-card-value" id="weekly-sleep-average-value"></p>
-        <span id="circle-graphic-weekly-sleep-average"></span>
       </div>
     </section>
 
@@ -170,7 +153,9 @@
         </div>
         <p id="journals-status" role="status"></p>
         <div id="journals-container">
+          <div id="journal-grid">
             <!-- app.js loads journal entries and puts em here -->
+          </div>
         </div>
     </section>
 
@@ -242,7 +227,7 @@
         </div>
 
         <p id="entry-error" role="alert"></p>
-        <button type="submit">Save entry</button>
+        <button id="save-journal-button" type="submit">Save entry</button>
       </form>
       </div>
     </section>

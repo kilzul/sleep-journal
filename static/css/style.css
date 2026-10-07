@@ -593,6 +593,7 @@ textarea {
     position: relative;
 }
 
+
 #journals-page::-webkit-scrollbar-track {
     color: transparent;
 }
@@ -609,18 +610,48 @@ textarea {
 
 }
 
+#journals-container {
+    width: 100%;
+}
+
+#journal-grid {
+    --card-w: 320px;
+    --card-h: 124px;
+    --gap: 24px;
+    width: calc(3 * var(--card-w) + 2 * var(--gap) + 24px);
+    height: calc(3 * var(--card-h) + 2 * var(--gap));
+    margin-top: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: #7ee5ff transparent;
+}
+
+.journal-page {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, var(--card-w));
+    grid-template-rows: repeat(3, var(--card-h));
+    grid-auto-flow: column;
+    gap: var(--gap);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
 .journal-card {
-    display: flex;
-    align-items: center;
-    margin: 30px;
     padding: 25px;
     background-color: #7ee5ff;
     font-family: Chewy;
     border-radius: 35px;
-    width: 320px;
-    height: 124px;
-    gap: 8px;
-
+    display: grid;
+    grid-template-columns: auto auto auto 1fr auto;
+    grid-template-areas:
+        "date hours quality . delete"
+        "notes notes notes notes notes";
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 6px;
 }
 
 #journals-status {
@@ -629,19 +660,24 @@ textarea {
 }
 
 .journal-notes {
-    flex: 2;
+    grid-area: notes;
     min-width: 0;
     overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    white-space: wrap;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
 }
 
-.entry-date, .journal-hours, .entry-quality, .delete-entry {
-    display: inline;
-    flex-shrink: 0;
-    white-space: nowrap;
+.journal-notes:empty {
+    display: none;
 }
+
+.entry-date    { grid-area: date; }
+.journal-hours { grid-area: hours; }
+.entry-quality { grid-area: quality; }
+.delete-entry  { grid-area: delete; }
 
 
 #add-journal-button {
@@ -674,6 +710,8 @@ textarea {
 
 
 /* Settings and journal statistics */
+
+
 #settings-page, #statistics-page {
     width: min(900px, calc(100vw - 110px));
     margin: 24px 12px 90px 90px;
@@ -684,19 +722,100 @@ textarea {
     font-size: 2rem;
     margin-bottom: 20px;
 }
-#settings-form { display: grid; gap: 10px; }
-#settings-form input { margin: 0; width: 100%; }
-#settings-form button { width: 100%; }
-#settings-status, #stats-status, #stats-insight { margin: 16px 0; }
+#settings-form { 
+    display: grid; 
+    gap: 10px; 
+}
+
+#settings-form input { 
+    margin: 0; 
+    width: 100%; 
+}
+
+#settings-form button { 
+    width: 100%; 
+}
+
+#settings-status, #stats-status, #stats-insight { 
+    margin: 16px 0; 
+}
+
+
 #settings-container > button, #stats-period {
     padding: 12px; border-radius: 8px; border: 1px solid #000; margin: 8px 4px 8px 0;
     background: #7ee5ff; font: inherit;
 }
-button:disabled { opacity: 0.6; cursor: wait; }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-.stats-grid .data-card { background: #7ee5ff; padding: 18px; border-radius: 20px; }
-.stats-grid h2 { font-size: 1rem; margin-bottom: 8px; }
-.stats-grid p { font-size: 1.4rem; }
-.sleep-history-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; align-items: center; }
-.sleep-history-row meter { flex: 1; min-width: 100px; height: 24px; }
-#delete-account-form { margin-top: 20px; }
+
+button:disabled { 
+    opacity: 0.6; 
+    cursor: wait; 
+}
+
+.stats-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 12px; 
+}
+
+.stats-grid .data-card { 
+    background: #7ee5ff; 
+    padding: 18px; 
+    border-radius: 20px; 
+}
+
+.stats-grid h2 { 
+    font-size: 1rem; 
+    margin-bottom: 8px; 
+}
+
+.stats-grid p { 
+    font-size: 1.4rem; 
+}
+
+.sleep-history-row { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 12px; 
+    margin: 12px 0; 
+    align-items: center; 
+}
+
+.sleep-history-row meter { 
+    flex: 1; 
+    min-width: 100px; 
+    height: 24px; 
+}
+
+#delete-account-form {
+    margin-top: 20px; 
+}
+
+/* Loading screen */
+
+#loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: #7ee5ff;
+    font-family: DynaPuff-Bold;
+}
+
+.loading-moon {
+    font-size: 3rem;
+    animation: float 1.6s ease-in-out infinite;
+}
+
+@keyframes float {
+    50% { transform: translateY(-12px) rotate(-8deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-moon { animation: none; }
+}
+
+/* overview page */ 
