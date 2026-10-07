@@ -35,8 +35,14 @@ body {
 
 }
 
+.page {
+    background-color: #43b2ce;
+    border-radius: 35px;
+    padding: 16px;
+}
+
 button {
-    cursor: pointer;
+    cursor: pointer;  
 }
 
 #bottom {
@@ -48,7 +54,7 @@ button {
     left: 90px;
 }
 
-
+ 
 #footer {
     font-family: DynaPuff-Bold;
     position: fixed;
@@ -213,7 +219,7 @@ button {
 .li::before    { background-color: #0a66c2; }
 .email::before { background-color: #444343; }
 
-/* Starter menu styling (restyle however you like) */
+
 .link-menu {
     position: absolute;
     bottom: calc(100% + 14px);
@@ -254,6 +260,7 @@ button {
 
 #log-in-page {
     width: 20rem;
+    min-height: 33rem;
     height: 33rem;
     background-color: #43b2ce;
     border-color: #fff;
@@ -326,6 +333,7 @@ input:hover {
 
 #sign-up-page {
     width: 20rem;
+    min-height: 43rem;
     height: 43rem;
     background-color: #43b2ce;
     border-color: #fff;
@@ -348,9 +356,10 @@ input:hover {
 }
 
 .error, .success {
+    position: absolute;
     display: none;
     font-size: 12px;
-    margin: 0;
+    margin: 0 5px;
     font-family: Chewy;
 }
 
@@ -396,7 +405,7 @@ input:hover {
 }
 
 .form-group:has(input:invalid:not(:placeholder-shown)) .error {
-    position: fixed;
+    position: absolute;
     display: block;
     color: red;
 }
@@ -406,7 +415,7 @@ input:hover {
 }
 
 .form-group:has(input:valid:not(:placeholder-shown)) .success {
-    position: fixed;
+    position: absolute;
     display: block;
     color: #0f7535;
 }
@@ -414,3 +423,252 @@ input:hover {
 #password-box {
     margin-bottom: 30px;
 }
+
+/* Add Journal Form */
+
+.quality-group {
+    width: auto;
+    background-color: #fff;
+    border: 2px #000 solid;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #000;
+    margin: 5px 5px;
+    outline: none;
+}
+
+#quality-title {
+    font-family: DynaPuff-Bold;
+    font-size: 1.2em;
+    font-weight: 600;
+
+}
+
+.quality-input {
+    position: absolute;
+    opacity: 0;
+    height: 1px;
+    width: 1px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#quality-error-text {
+    margin: 0 5px;
+}
+
+.quality-options {
+    position: relative;
+    top: 0;
+}
+
+.quality-options-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+
+.radio-box {
+    position: relative;
+}
+
+.radio-box label {
+    display: block;
+    font-size: 2.5rem;
+    line-height: 1;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: transform 0.2s, opacity 0.2s, background-color 0.2s;
+}
+
+.radio-box label:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.quality-input:checked + label {
+    opacity: 1;
+    background-color: #7ee5ff;
+}
+
+.quality-input:focus-visible + label {
+    outline: 3px solid #1a1a2e;
+    outline-offset: 2px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .radio-box label { transition: none; }
+}
+
+textarea {
+    width: 25rem;
+    height: 15rem;
+    background-color: #fff;
+    border: 2px #000 solid;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #000;
+    margin: 8px 5px 4px;
+    margin-top: 20px;
+    outline: none;
+    resize: none;
+}
+
+.form-group {
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.form-group #radio-form-group {
+    margin-bottom: 30px;
+    position: relative;
+}
+
+#journals-page {
+    height: 675px;
+    min-width: 1100px;
+    padding: 20px;
+}
+
+#notes-count {
+    font-family: Chewy;
+}
+
+.red #notes-count {
+    color: red;
+}
+
+#entry-form .error {
+    position: static;
+    display: none;
+    margin: 4px 5px 0;
+    color: red;
+}
+ 
+#entry-form .box.invalid .error,
+#entry-form .box.invalid + .error {
+    display: block;
+}
+ 
+#entry-form input,
+#entry-form textarea {
+    border-color: #000;
+}
+ 
+#entry-form .box.invalid input,
+#entry-form .box.invalid textarea {
+    border-color: red;
+}
+ 
+#entry-form .quality-group.invalid {
+    border-color: red;
+}
+
+#sleep-summary {
+    font-family: Chewy;
+}
+
+#new-entry {
+    font-family: DynaPuff-Bold;
+    font-size: 2.6rem;
+    margin-bottom: 40px;
+}
+
+/* Journals page */ 
+
+#journals-page {
+    position: relative;
+}
+
+#journals-page::-webkit-scrollbar-track {
+    color: transparent;
+}
+
+#journals-page::-webkit-scrollbar-thumb {
+    color: #43b2ce;
+}
+
+#journals-title {
+    font-family: DynaPuff-Bold;
+    font-size: 4.5rem;
+    min-width: 990px !important;
+    display: inline;
+
+}
+
+.journal-card {
+    display: flex;
+    align-items: center;
+    margin: 30px;
+    padding: 25px;
+    background-color: #7ee5ff;
+    font-family: Chewy;
+    border-radius: 35px;
+    width: 320px;
+    height: 124px;
+    gap: 8px;
+
+}
+
+#journals-status {
+    font-family: Chewy;
+    margin-top: 20px;
+}
+
+.journal-notes {
+    flex: 2;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    white-space: wrap;
+}
+
+.entry-date, .journal-hours, .entry-quality, .delete-entry {
+    display: inline;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+
+#add-journal-button {
+    display: inline;
+    width: 5rem;
+    height: 3rem;
+    background-color: #7ee5ff;
+    outline: none;
+    border: none;
+    border-radius: 8px;
+    margin-top: 1rem;
+    position: absolute;
+    top: 20px;
+    right: 50px;
+}
+
+#add-journal-button:hover {
+    border: 3px #fff solid;
+    transform: scale(1.05);
+}
+
+#entry-search {
+    position: absolute;
+    font-family: Chewy;
+    display: inline;
+    margin-left: 100px;
+    width: 400px;
+
+}
+

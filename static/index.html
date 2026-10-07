@@ -9,287 +9,312 @@
 </head>
 <body>
 
-    <header hidden>
-        <h1>Sleep Journal</h1>
-    </header>
 
-    <div class="layout">
+<div class="layout">
 
-        <div id="navbar">
-            <ul>
-                <li class="selector" id="logo">
-                    <div>
-                        <span class="sidebar-icon" id="logo-icon"><i class="fa-solid fa-moon"></i></span>
-                        <span class="selector-text" id="app-name">Snoozely</span> <!-- prototype name, we can brainstorm one tgt-->
-                    </div>
-                </li>
-                <li class="selector">
-                    <div id="overview-button">
-                        <span class="sidebar-icon"><i class="fa-solid fa-house"></i></span>
-                        <span class="selector-text" id="overview-selector">Overview</span>
-                    </div>
-                </li>
-                <li class="selector">
-                    <div id="journals-button">
-                        <span class="sidebar-icon"><i class="fa-solid fa-book"></i></span>
-                        <span class="selector-text" id="journals-selector">Journals</span>
-                    </div>
-                </li>
-                <li class="selector">
-                    <div id="calendar-button">
-                        <span class="sidebar-icon"><i class="fa-solid fa-calendar"></i></span>
-                        <span class="selector-text" id="calendar-selector">Calendar</span>
-                    </div>
-                </li>
-                <li class="selector">
-                    <div id="stats-button">
-                        <span class="sidebar-icon"><i class="fa-solid fa-chart-column"></i></span>
-                        <span class="selector-text" id="stats-selector">Statistics</span>
-                    </div>
-                </li>
-                <li id="sleep-profile">
-                    <div id="sleep-profile-data">
-                        <h3 id="profile-title"></h3>
-                    </div>
-                </li>
-                <li class="selector" id="settings">
-                    <div id="settings-button">
-                        <span class="sidebar-icon"><i class="fa-solid fa-gear"></i></span>
-                        <span class="selector-text" id="settings-selector">Settings</span>
-                    </div>
-                </li>
-            </ul>
-        </div>
-
-        <main>
-
-            <section data-route="signup" class="page" id="sign-up-page" hidden>
-
-                <div class="page-title" id="sign-up-title">
-                    <h3 id="sign-up-title-text">Time to make a Snoozely account!</h3>
+    <div id="navbar">
+        <ul>
+            <li class="selector" id="logo">
+                <div>
+                    <span class="sidebar-icon" id="logo-icon"><i class="fa-solid fa-moon"></i></span>
+                    <span class="selector-text" id="app-name">Snoozely</span>
                 </div>
-                <div class="form">
-                    <form id="sign-up-form" action="/api/signup" method="POST" novalidate>
-                        <div class="form-group" id="name-form-group">
-                            <label id="name-label" for="Name">Name:</label>
-                            <div class="box">
-                                <input type="text" placeholder="What name can we call you?" aria-placeholder="Enter your name" id="name" name="name" required>
-                                <p class="success">Nice to meet you, </p>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label id="email-label" for="email">Email:</label>
-                            <div class="box">
-                                <input type="email" id="email" name="email"  placeholder="What's your email?" aria-placeholder="Enter your email" required>
-                                <p class="success">That's better!</p>
-                                <p class="error">Hey... that's not an email.</p>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label id="password-label" for="password">Password:</label>
-                            <div class="box" id="password-box">
-                                <input placeholder="Create a password" aria-placeholder="password" type="password" id="sign-up-password" name="password" required>
-                                <p class="success">Nice! Cool password! (Don't worry. We won't tell anyone.)</p>
-                                <p class="error">Sorry, your password has to be at least 12 characters, with an <br>uppercase and a lowercase letter.</p>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label id="confirm-label" for="password">Confirm Password:</label>
-                            <div class="box">
-                                <input placeholder="Now write it again!" aria-placeholder="confirm password" type="password" id="confirm-password" required>
-                                <p class="success">Perfect! Looks the same to me!</p>
-                                <p class="error">Wait a minute... these passwords don't match!</p>
-                            </div>
-                        </div>
-                        <button id="sign-up-button">Let's get started!</button>
-                    </form>
-                    <button id="iahaa">I already have an account</button>
+            </li>
+            <li class="selector">
+                <div id="overview-button">
+                    <span class="sidebar-icon"><i class="fa-solid fa-house"></i></span>
+                    <span class="selector-text" id="overview-selector">Overview</span>
                 </div>
-
-            </section>
-
-            <section data-route="login" class="page" id="log-in-page">
-
-
-                <div class="page-title" id="log-in-title">
-                    <h3 id="log-in-title-text">Already have a Snoozely account?</h3>
+            </li>
+            <li class="selector">
+                <div id="journals-button">
+                    <span class="sidebar-icon"><i class="fa-solid fa-book"></i></span>
+                    <span class="selector-text" id="journals-selector">Journals</span>
                 </div>
-                <div class="form">
-                    <form id="log-in-form" action="/api/login" method="POST" novalidate>
-                        <div class="form-group">
-                            <label id="email-label" for="email">Enter your email:</label>
-                            <div class="box" id="login-box">
-                                <input type="email" placeholder="What's your email?" aria-placeholder="Please enter your email" id="login-email" name="email" required>
-                                <p class="success">That's more like it!</p>
-                                <p class="error">That's not an email...</p>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label id="password-label" for="password">Enter your password:</label>
-                            <div class="box">
-                                <input type="password" placeholder="What's your password?" aria-placeholder="password" id="log-in-password" name="password" required>
-                            </div>
-                        </div>
-                        <button id="log-in-button" type="submit">Log In</button>
-                    </form>
-                    <button id="idhaa">I don't have an account</button>
+            </li>
+            <li class="selector">
+                <div id="calendar-button">
+                    <span class="sidebar-icon"><i class="fa-solid fa-calendar"></i></span>
+                    <span class="selector-text" id="calendar-selector">Calendar</span>
                 </div>
-
-                <p id="log-in-notice"></p>
-
-
-
-            </section>
-
-            <section data-route="welcome" class="transition-page" id="welcome-page" hidden>
-
-                <div id="welcome-message">
-                    <span id="welcome-message-text">Test</span>
+            </li>
+            <li class="selector">
+                <div id="stats-button">
+                    <span class="sidebar-icon"><i class="fa-solid fa-chart-column"></i></span>
+                    <span class="selector-text" id="stats-selector">Statistics</span>
                 </div>
-
-            </section>
-
-            <section data-route="overview" class="page" id="overview-page" hidden>
-
-                <div class="page-title">Overview</div>
-
-
-                <div id="bedtime-timer" class="data-card">
-                    <p class="data-card-title">Bedtime Timer</p>
-                    <div id="bedtime-timer-display">
-                        <span id="bedtime-timer-graphic"></span>
-                        <span id="bedtime-timer-description"></span>
-                        <span id="bedtime-timer-value"></span>
-                    </div>
+            </li>
+            <li id="sleep-profile">
+                <div id="sleep-profile-data">
+                    <h3 id="profile-title"></h3>
                 </div>
-
-                <div id="best-sleep-day" class="data-card">
-                    <p class="data-card-title">Best Sleep Day</p>
-                    <div id="week-month-year">
-                        <span class="best-sleep-day-selector">Week</span>
-                        <span class="best-sleep-day-selector">Month</span>
-                        <span class="best-sleep-day-selector">Year</span>
-                    </div>
-                    <div id="best-sleep-day-display">
-                        <span id="best-sleep-day-graphic"></span>
-                        <span id="best-sleep-day-value"></span>
-                    </div>
+            </li>
+            <li class="selector" id="settings">
+                <div id="settings-button">
+                    <span class="sidebar-icon"><i class="fa-solid fa-gear"></i></span>
+                    <span class="selector-text" id="settings-selector">Settings</span>
                 </div>
-
-                <div id="weekly-sleep-average" class="data-card">
-                    <p class="data-card-title">Weekly Sleep Average</p>
-                    <p class="data-card-value" id="weekly-sleep-average-value"></p>
-                    <span id="circle-graphic-weekly-sleep-average"></span>
-                </div>
-
-
-            </section>
-
-            <section data-route="journals" class="page" id="journals-page" hidden>
-
-                <div class="page-title" id="journals-title"><p id="page-title">Journals</p></div>
-                <span id="search-journals"></span>
-                <span id="add-journal-button">+</span>
-                <div id="journals-container"></div>
-                    <!-- journals go here, will write a function that puts them here with a html card format in the javascript -->
-                </div>
-
-            </section>
-
-            <section data-route="calendar" class="page" id="calendar-page" hidden>
-
-                <div class="page-title" id="calendar-title"><p id="page-title">Calendar</p></div>
-                <div id="calendar-container">
-                    <!-- will have to figure out a function to make a calendar here, or call an api or summ -->
-                </div>
-
-            </section>
-
-            <section data-route="stats" class="page" id="statistics-page" hidden>
-
-                <div class="page-title" id="statistics-title"><p id="page-title">Statistics</p></div>
-                <div id="statistics-container">
-                    <!-- will put your graphs and stuff here -->
-                </div>
-
-            </section>
-
-            <section data-route="settings" id="settings-page" hidden>
-
-                <p id="page-title settings-title">Settings</p>
-                <div id="settings-container">
-                    <button id="change-name-button">Change Name</button>
-                    <button id="sign-out-button">Sign Out</button>
-                    <button id="delete-account-button">Delete Account</button>
-                </div>
-
-            </section>
-
-            <section id="bottom">
-
-                <div class="creators-section" id="creators-section">
-
-                    <div class="icon-group githubs">
-                        <button type="button" class="icon gh" aria-label="GitHub links" aria-expanded="false" aria-controls="github-menu">
-                            <i class="fa-brands fa-github" aria-hidden="true"></i>
-                        </button>
-                        <ul class="link-menu" id="github-menu" hidden>
-                            <li>
-                                <a href="#creator1" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a>
-                            </li>
-                            <li>
-                                <a href="#creator2" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="icon-group linkedins">
-                        <button type="button" class="icon li" aria-label="LinkedIn links" aria-expanded="false" aria-controls="linkedin-menu">
-                            <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
-                        </button>
-                        <ul class="link-menu" id="linkedin-menu" hidden>
-                            <li>
-                                <a href="#creator1" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a>
-                            </li>
-                            <li>
-                                <a href="#creator2" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="icon-group email">
-                        <button type="button" class="icon email" aria-label="Email" aria-expanded="false" aria-controls="email-menu">
-                            <i class="fa-solid fa-envelope" aria-hidden="true"></i>
-                        </button>
-                        <ul class="link-menu" id="email-menu" hidden>
-                            <li>
-                                <a href="#creator1" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a>
-                            </li>
-                            <li>
-                                <a href="#creator2" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a>
-                            </li>
-                        </ul>
-                    </div> 
-
-                </div>
-
-                <div id="footer">
-                    <p>© 2026 Snoozely. All rights reserved.</p>
-                </div>
-                
-            </section>
-
-        </main>
-        
+            </li>
+        </ul>
     </div>
 
-    <div class="menus">
-        <div id="github-menu">
+  <main>
 
-        </div>
+<section data-route="signup" class="page" id="sign-up-page" hidden>
+    <div class="page-title" id="sign-up-title">
+        <h3 id="sign-up-title-text">Time to make a Snoozely account!</h3>
     </div>
+        <div class="form">
+            <form id="sign-up-form" novalidate>
+                <div class="form-group" id="name-form-group">
+                    <label id="name-label" for="name">Name:</label>
+                    <div class="box">
+                        <input type="text" placeholder="What name can we call you?" aria-placeholder="Enter your name" id="name" name="name" required>
+                        <p class="success">Nice to meet you, </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label id="email-label" for="email">Email:</label>
+                    <div class="box">
+                        <input type="email" id="email" name="email" placeholder="What's your email?" aria-placeholder="Enter your email" required>
+                        <p class="success">That's better!</p>
+                        <p class="error">Hey... that's not an email.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label id="password-label" for="sign-up-password">Password:</label>
+                    <div class="box" id="password-box">
+                        <input placeholder="Create a password" aria-placeholder="password" type="password" id="sign-up-password" name="password" required>
+                        <p class="success">Nice! Cool password! (Don't worry. We won't tell anyone.)</p>
+                        <p class="error">Sorry, your password has to be at least 12 characters, with an <br>uppercase and a lowercase letter.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label id="confirm-label" for="confirm-password">Confirm Password:</label>
+                    <div class="box">
+                        <input placeholder="Now write it again!" aria-placeholder="confirm password" type="password" id="confirm-password" required>
+                        <p class="success">Perfect! Looks the same to me!</p>
+                        <p class="error">Wait a minute... these passwords don't match!</p>
+                    </div>
+                </div>
+                <button type="submit" id="sign-up-button">Let's get started!</button>
+            </form>
+        <button type="button" id="iahaa">I already have an account</button>
+    </div>
+</section>
 
-    <script type="module" src="./js/app.js"></script>
+    <section data-route="login" class="page" id="log-in-page">
+      <div class="page-title" id="log-in-title">
+        <h3 id="log-in-title-text">Already have a Snoozely account?</h3>
+      </div>
+      <div class="form">
+        <form id="log-in-form" novalidate>
+          <div class="form-group">
+            <label id="login-email-label" for="login-email">Enter your email:</label>
+            <div class="box" id="login-box">
+              <input type="email" placeholder="What's your email?" aria-placeholder="Please enter your email" id="login-email" name="email" required>
+              <p class="success">That's more like it!</p>
+              <p class="error">That's not an email...</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label id="login-password-label" for="log-in-password">Enter your password:</label>
+            <div class="box">
+              <input type="password" placeholder="What's your password?" aria-placeholder="password" id="log-in-password" name="password" required>
+            </div>
+          </div>
+          <button id="log-in-button" type="submit">Log In</button>
+        </form>
+        <button type="button" id="idhaa">I don't have an account</button>
+      </div>
+      <p id="log-in-notice" role="status"></p>
+    </section>
+
+    <section data-route="overview" class="page" id="overview-page" hidden>
+      <div class="page-title">Overview</div>
+
+      <div id="bedtime-timer" class="data-card">
+        <p class="data-card-title">Bedtime Timer</p>
+        <div id="bedtime-timer-display">
+          <span id="bedtime-timer-graphic"></span>
+          <span id="bedtime-timer-description"></span>
+          <span id="bedtime-timer-value"></span>
+        </div>
+      </div>
+
+      <div id="best-sleep-day" class="data-card">
+        <p class="data-card-title">Best Sleep Day</p>
+        <div id="week-month-year">
+          <span class="best-sleep-day-selector">Week</span>
+          <span class="best-sleep-day-selector">Month</span>
+          <span class="best-sleep-day-selector">Year</span>
+        </div>
+        <div id="best-sleep-day-display">
+          <span id="best-sleep-day-graphic"></span>
+          <span id="best-sleep-day-value"></span>
+        </div>
+      </div>
+
+      <div id="weekly-sleep-average" class="data-card">
+        <p class="data-card-title">Weekly Sleep Average</p>
+        <p class="data-card-value" id="weekly-sleep-average-value"></p>
+        <span id="circle-graphic-weekly-sleep-average"></span>
+      </div>
+    </section>
+
+    <section data-route="journals" class="page" id="journals-page" hidden>
+        <div class="page-title" >
+            <p id="journals-title">Journals</p>
+            <input type="text" id="entry-search" placeholder="Search your journal entries...">
+            <button type="button" id="add-journal-button" aria-label="Add a journal entry"><i class="fa-regular fa-pen-to-square"></i></button>
+        </div>
+        <p id="journals-status" role="status"></p>
+        <div id="journals-container">
+            <!-- app.js loads journal entries and puts em here -->
+        </div>
+    </section>
+
+    <section data-route="journal-form" class="page" id="journal-form" hidden>
+        <p id="new-entry">New Entry</p>
+      <div class="form">
+      <form id="entry-form" novalidate>
+        <div class="form-group">
+          <label for="sleep-date">What day was this?</label>
+          <div class="box">
+            <input type="date" id="sleep-date" name="sleep_date" required>
+            <p class="error">It will be hard to keep track of your data without a date.</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="bed-time">What time did you go to sleep?</label>
+          <div class="box">
+            <input type="time" id="bed-time" name="bedtime" required>
+            <p class="error">Wait a minute, something isn't right here...</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="wake-time">What time did you wake up?</label>
+          <div class="box">
+            <input type="time" id="wake-time" name="wake_time" required>
+            <p class="error">Wait a minute... something isn't adding up...</p>
+          </div>
+        </div>
+
+        <p id="sleep-summary" aria-live="polite"></p>
+
+        <div class="form-group" id="radio-form-group">
+          <p id="quality-title">How was your sleep?</p>
+          <fieldset class="box quality-group" aria-labelledby="quality-title">
+            <div class="quality-options-container">
+              <div class="radio-box">
+                <input type="radio" class="quality-input" id="quality-1" name="quality" value="1" required>
+                <label for="quality-1"><i class="fa-regular fa-face-sad-cry" aria-hidden="true"></i><span class="sr-only">Terrible</span></label>
+              </div>
+              <div class="radio-box">
+                <input type="radio" class="quality-input" id="quality-2" name="quality" value="2">
+                <label for="quality-2"><i class="fa-regular fa-face-frown" aria-hidden="true"></i><span class="sr-only">Poor</span></label>
+              </div>
+              <div class="radio-box">
+                <input type="radio" class="quality-input" id="quality-3" name="quality" value="3">
+                <label for="quality-3"><i class="fa-regular fa-face-meh" aria-hidden="true"></i><span class="sr-only">Ok</span></label>
+              </div>
+              <div class="radio-box">
+                <input type="radio" class="quality-input" id="quality-4" name="quality" value="4">
+                <label for="quality-4"><i class="fa-regular fa-face-smile" aria-hidden="true"></i><span class="sr-only">Good</span></label>
+              </div>
+              <div class="radio-box">
+                <input type="radio" class="quality-input" id="quality-5" name="quality" value="5">
+                <label for="quality-5"><i class="fa-regular fa-face-grin-stars" aria-hidden="true"></i><span class="sr-only">Great</span></label>
+              </div>
+            </div>
+          </fieldset>
+          <p class="error" id="quality-error-text">Pick a face so we know how it felt.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Tell us about it!</label>
+          <div class="box">
+            <textarea id="notes" name="notes" maxlength="200" rows="4" aria-describedby="notes-count"></textarea>
+            <p id="notes-count" hidden>0 / 200</p>
+          </div>
+        </div>
+
+        <p id="entry-error" role="alert"></p>
+        <button type="submit">Save entry</button>
+      </form>
+      </div>
+    </section>
+
+    <section data-route="calendar" class="page" id="calendar-page" hidden>
+      <div class="page-title" id="calendar-title"><p>Calendar</p></div>
+      <div id="calendar-container">
+        <!-- will have to figure out a function to make a calendar here, or call an api or summ -->
+      </div>
+    </section>
+
+    <section data-route="stats" class="page" id="statistics-page" hidden>
+      <div class="page-title" id="statistics-title"><p>Statistics</p></div>
+      <div id="statistics-container">
+        <!-- will put your graphs and stuff here -->
+      </div>
+    </section>
+
+    <section data-route="settings" class="page" id="settings-page" hidden>
+      <p class="page-title" id="settings-title">Settings</p>
+      <div id="settings-container">
+        <button type="button" id="change-name-button">Change Name</button>
+        <button type="button" id="sign-out-button">Sign Out</button>
+        <button type="button" id="delete-account-button">Delete Account</button>
+      </div>
+    </section>
+
+    <section id="bottom">
+      <div class="creators-section" id="creators-section">
+
+        <div class="icon-group githubs">
+          <button type="button" class="icon gh" aria-label="GitHub links" aria-expanded="false" aria-controls="github-menu">
+            <i class="fa-brands fa-github" aria-hidden="true"></i>
+          </button>
+          <ul class="link-menu" id="github-menu" hidden>
+            <li><a href="https://github.com/kilzul" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a></li>
+            <li><a href="https://github.com/EliLevasseur" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a></li>
+          </ul>
+        </div>
+
+        <div class="icon-group linkedins">
+          <button type="button" class="icon li" aria-label="LinkedIn links" aria-expanded="false" aria-controls="linkedin-menu">
+            <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+          </button>
+          <ul class="link-menu" id="linkedin-menu" hidden>
+            <li><a href="https://www.linkedin.com/in/raheil-bryce-ba894b269" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a></li>
+            <li><a href="https://www.linkedin.com/in/eli-levasseur-3a627b388" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a></li>
+          </ul>
+        </div>
+
+        <div class="icon-group emails">
+          <button type="button" class="icon email" aria-label="Email" aria-expanded="false" aria-controls="email-menu">
+            <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+          </button>
+          <ul class="link-menu" id="email-menu" hidden>
+            <li><a href="mailto:rahsb8@gmail.com" target="_blank" rel="noopener noreferrer">Raheil Bryce (frontend)</a></li>
+            <li><a href="mailto:levasseur.elipierre@gmail.com" target="_blank" rel="noopener noreferrer">Eli Levasseur (backend)</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div id="footer">
+        <p>© 2026 Snoozely. All rights reserved.</p>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<script type="module" src="./js/app.js"></script>
 
 </body>
 </html>
