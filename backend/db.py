@@ -95,3 +95,38 @@ def delete_journal(user_id, entry_id):
                 (entry_id, user_id),
             )
             return cur.fetchone() is not None
+
+
+def get_settings(user_id):
+    with connect_db() as conn:
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("SELECT username, email, sleep_goal_hours, target_wake_time FROM public.users WHERE id = %s", (user_id,))
+            return cur.fetchone()
+
+
+def update_settings(user_id, username, sleep_goal_hours, target_wake_time):
+    with connect_db() as conn:
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """UPDATE public.users SET username = %s, sleep_goal_hours = %s, target_wake_time = %s
+                   WHERE id = %s RETURNING username, email, sleep_goal_hours, target_wake_time""",
+                (username, sleep_goal_hours, target_wake_time, user_id),
+            )
+            return cur.fetchone()
+
+
+def delete_account(user_id, password):
+    with connect_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT password_hash FROM public.users WHERE id = %s FOR UPDATE", (user_id,))
+            row = cur.fetchone()
+            try:
+                valid = row and password_hasher.verify(password, row[0])
+            except UnknownHashError:
+                valid = False
+            if not valid:
+                return False
+            cur.execute("DELETE FROM public.user_sessions WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM public.journals WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM public.users WHERE id = %s", (user_id,))
+            return True

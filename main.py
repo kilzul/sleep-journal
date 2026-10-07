@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
-from fastapi import Body, Depends, FastAPI, Form, HTTPException, Path as PathParam, Request, Response
+from fastapi import Depends, FastAPI, Form, HTTPException, Path as PathParam, Query, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from psycopg import Error
@@ -9,7 +9,9 @@ from psycopg.errors import UniqueViolation
 
 from backend.db import (
     authenticate_user, delete_journal, get_user_journals, insert_journal, insert_user,
+    get_settings, update_settings, delete_account,
 )
+from backend.stats import calculate_stats
 from backend.sessions import (
     COOKIE_NAME, COOKIE_SECURE, create_session, get_current_user,
     revoke_session, set_session_cookie, verify_request_origin,
@@ -29,6 +31,42 @@ if STATIC_DIR.is_dir():
         if directory.is_dir():
             app.mount(f"/{folder}", StaticFiles(directory=directory), name=folder)
 
+
+@app.get("/api/settings")
+def read_settings(response: Response, user: dict = Depends(get_current_user)):
+    response.headers["Cache-Control"] = "no-store"
+    return get_settings(user["id"])
+
+
+@app.put("/api/settings")
+def save_settings(response: Response, username: str = Form(..., min_length=1, max_length=100),
+                  sleep_goal_hours: float = Form(..., ge=1, le=16), target_wake_time: time = Form(...),
+                  user: dict = Depends(get_current_user), _origin=Depends(verify_request_origin)):
+    if not username.strip() or target_wake_time.tzinfo is not None:
+        raise HTTPException(status_code=422, detail="Enter a name and a local wake-up time.")
+    response.headers["Cache-Control"] = "no-store"
+    try:
+        return update_settings(user["id"], username.strip(), sleep_goal_hours, target_wake_time)
+    except UniqueViolation:
+        raise HTTPException(status_code=409, detail="That name is already taken.")
+
+
+@app.get("/api/stats")
+def read_stats(response: Response, days: int = Query(30, ge=1, le=365), today: date | None = Query(None),
+               user: dict = Depends(get_current_user)):
+    response.headers["Cache-Control"] = "no-store"
+    return calculate_stats(get_user_journals(user["id"]), get_settings(user["id"]), days, today)
+
+
+@app.delete("/api/account", status_code=204)
+def remove_account(response: Response, password: str = Form(...), user: dict = Depends(get_current_user),
+                   _origin=Depends(verify_request_origin)):
+    if not delete_account(user["id"], password):
+        raise HTTPException(status_code=403, detail="Incorrect password. Account was not deleted.")
+    response.delete_cookie(COOKIE_NAME, path="/", secure=COOKIE_SECURE, httponly=True, samesite="lax")
+    response.status_code = 204
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 @app.exception_handler(Error)
 def handle_database_error(request, error):
@@ -110,23 +148,8 @@ def list_journals(response: Response, user: dict = Depends(get_current_user)):
 
 
 @app.post("/api/entries", status_code=201)
-def handle_entry(
-    response: Response,
-    sleep_date: date = Body(...),
-    bedtime: time = Body(...),
-    wake_time: time = Body(...),
-    quality: int = Body(..., ge=1, le=5, strict=True),
-    notes: str = Body("", max_length=200),
-    user: dict = Depends(get_current_user),
-    _origin=Depends(verify_request_origin),
-):
-    """Accept the existing frontend's JSON fields without a custom model class."""
-    response.headers["Cache-Control"] = "no-store"
-    return save_journal(user["id"], sleep_date, bedtime, wake_time, quality, notes)
-
-
 @app.post("/api/journals", status_code=201)
-def handle_journal(
+def handle_entry(
     response: Response,
     sleep_date: date = Form(...),
     bedtime: time = Form(...),
@@ -136,7 +159,7 @@ def handle_journal(
     user: dict = Depends(get_current_user),
     _origin=Depends(verify_request_origin),
 ):
-    """Keep the original HTML form endpoint working with the same database insert."""
+    """Accept the frontend's FormData; both paths save through the same function."""
     response.headers["Cache-Control"] = "no-store"
     return save_journal(user["id"], sleep_date, bedtime, wake_time, quality, notes)
 
