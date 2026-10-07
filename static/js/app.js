@@ -462,13 +462,11 @@ entryForm.addEventListener("submit", async (event) => {
         return;
     }
 
-    await api("/entries", {
-        method: "POST",
-        body: new FormData(entryForm)
-    });
-
     try {
-        await api("/entries", { method: "POST", body: JSON.stringify(data) });
+        await api("/entries", {
+            method: "POST",
+            body: new FormData(entryForm)
+        });
         entryForm.reset();
         sleepSummary.textContent = "";
         notesCount.hidden = true;

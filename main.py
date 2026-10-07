@@ -1,12 +1,15 @@
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, Form, HTTPException, Path as PathParam, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from psycopg import Error
 from psycopg.errors import UniqueViolation
 
-from backend.db import authenticate_user, insert_user
+from backend.db import (
+    authenticate_user, delete_journal, get_user_journals, insert_journal, insert_user,
+)
 from backend.sessions import (
     COOKIE_NAME, COOKIE_SECURE, create_session, get_current_user,
     revoke_session, set_session_cookie, verify_request_origin,
@@ -14,15 +17,17 @@ from backend.sessions import (
 
 
 app = FastAPI()
-HTML_FILE = Path(__file__).resolve().parent / "static" / "index.html"
-app.mount("/static", StaticFiles(directory=HTML_FILE.parent), name="static")
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 HTML_FILE = STATIC_DIR / "index.html"
 
-app.mount("/css", StaticFiles(directory=STATIC_DIR / "css"), name="css")
-app.mount("/js", StaticFiles(directory=STATIC_DIR / "js"), name="js")
-app.mount("/fonts", StaticFiles(directory=STATIC_DIR / "fonts"), name="fonts")
+# The backend branch can run without the frontend files. Serve them when present.
+if STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    for folder in ("css", "js", "fonts"):
+        directory = STATIC_DIR / folder
+        if directory.is_dir():
+            app.mount(f"/{folder}", StaticFiles(directory=directory), name=folder)
 
 app.mount("/fonts", StaticFiles(directory=STATIC_DIR / "fonts"), name="fonts")
 
@@ -37,6 +42,8 @@ def handle_database_error(request, error):
 
 @app.get("/")
 async def read_index():
+    if not HTML_FILE.is_file():
+        raise HTTPException(status_code=404, detail="Frontend files are not present. The backend API is available at /docs.")
     return FileResponse(HTML_FILE)
 
 
@@ -81,15 +88,51 @@ def handle_logout(request: Request, response: Response, _origin=Depends(verify_r
     return {"success": True, "message": "Logged out"}
 
 
-@app.post("/api/journals")
-async def handle_journal(
-    sleep_date: str = Form(...),
-    bedtime: str = Form(...),
-    wake_time: str = Form(...),
-    quality: int = Form(...),
-    notes: str = Form(""),
+def save_journal(user_id, sleep_date, bedtime, wake_time, quality, notes):
+    """The sleep date is the bedtime's date; earlier wake times mean the next day."""
+    if bedtime.tzinfo is not None or wake_time.tzinfo is not None:
+        raise HTTPException(status_code=422, detail="Use local times without a timezone, such as 23:00.")
+    if bedtime == wake_time:
+        raise HTTPException(status_code=422, detail="Bedtime and wake-up time must be different.")
+
+    bed_at = datetime.combine(sleep_date, bedtime)
+    wake_at = datetime.combine(sleep_date, wake_time)
+    if wake_time < bedtime:
+        wake_at += timedelta(days=1)
+
+    return insert_journal(user_id, sleep_date, bed_at, wake_at, quality, notes)
+
+
+@app.get("/api/entries")
+def list_journals(response: Response, user: dict = Depends(get_current_user)):
+    """Return an array directly, as expected by the frontend's renderEntries()."""
+    response.headers["Cache-Control"] = "no-store"
+    return get_user_journals(user["id"])
+
+
+@app.post("/api/entries", status_code=201)
+@app.post("/api/journals", status_code=201)
+def handle_entry(
+    response: Response,
+    sleep_date: date = Form(...),
+    bedtime: time = Form(...),
+    wake_time: time = Form(...),
+    quality: int = Form(..., ge=1, le=5),
+    notes: str = Form("", max_length=200),
     user: dict = Depends(get_current_user),
     _origin=Depends(verify_request_origin),
 ):
-    # Add your database insert here later.
-    return {"message": "Journal inputs received. Nothing was saved."}
+    """Accept the frontend's FormData; both paths save through the same function."""
+    response.headers["Cache-Control"] = "no-store"
+    return save_journal(user["id"], sleep_date, bedtime, wake_time, quality, notes)
+
+
+@app.delete("/api/entries/{entry_id}", status_code=204)
+def handle_delete_journal(
+    entry_id: int = PathParam(..., gt=0),
+    user: dict = Depends(get_current_user),
+    _origin=Depends(verify_request_origin),
+):
+    if not delete_journal(user["id"], entry_id):
+        raise HTTPException(status_code=404, detail="Journal not found.")
+    return Response(status_code=204, headers={"Cache-Control": "no-store"})
