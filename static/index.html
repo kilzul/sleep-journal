@@ -257,16 +257,39 @@
     <section data-route="stats" class="page" id="statistics-page" hidden>
       <div class="page-title" id="statistics-title"><p>Statistics</p></div>
       <div id="statistics-container">
-        <!-- will put your graphs and stuff here -->
+        <label for="stats-period">Show</label>
+        <select id="stats-period"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="365">Last year</option></select>
+        <p id="stats-status" role="status" aria-live="polite"></p>
+        <div id="stats-cards" class="stats-grid"></div>
+        <p id="stats-insight"></p>
+        <h2>Recent sleep</h2>
+        <div id="stats-history"></div>
       </div>
     </section>
 
     <section data-route="settings" class="page" id="settings-page" hidden>
       <p class="page-title" id="settings-title">Settings</p>
       <div id="settings-container">
-        <button type="button" id="change-name-button">Change Name</button>
+        <form id="settings-form" class="form">
+          <label for="settings-name">Name</label>
+          <input id="settings-name" name="username" required maxlength="100">
+          <p id="settings-email"></p>
+          <label for="sleep-goal">Sleep goal (hours)</label>
+          <input id="sleep-goal" name="sleep_goal_hours" type="number" min="1" max="16" step="0.25" required>
+          <label for="target-wake">Target wake-up time</label>
+          <input id="target-wake" name="target_wake_time" type="time" required>
+          <button type="submit" id="save-settings-button" disabled>Save settings</button>
+        </form>
+        <p id="settings-status" role="status" aria-live="polite"></p>
         <button type="button" id="sign-out-button">Sign Out</button>
         <button type="button" id="delete-account-button">Delete Account</button>
+        <form id="delete-account-form" class="form" hidden>
+          <p>This permanently deletes your account and all sleep journals. Enter your password to confirm.</p>
+          <label for="delete-password">Password</label>
+          <input id="delete-password" name="password" type="password" autocomplete="current-password" required>
+          <button type="submit">Permanently delete my account</button>
+          <button type="button" id="cancel-delete-button">Cancel</button>
+        </form>
       </div>
     </section>
 

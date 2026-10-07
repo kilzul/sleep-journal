@@ -1,4 +1,5 @@
-import { api } from "./api.js"; // will switch this to api.js when the endpoints r up
+import { api } from "./api.js";
+import { loadStats, clearStats } from "./stats.js";
 
 const DEV_BYPASS = false; // will delete this before merging or will make false;
 
@@ -54,10 +55,13 @@ function showPage(page) {
 
     if (shouldShake) shake(logInNotice);
     if (page.id === "journals-page") loadJournals();
+    if (page.id === "settings-page") loadSettings();
+    if (page.id === "statistics-page") loadStats(handleSessionExpired);
 }
 
 function handleSessionExpired() {
     loggedIn = false;
+    clearPrivateData();
     wantedPage = null;
     showPage(document.getElementById("log-in-page"));
     logInNotice.textContent = "Your session expired. Please log in again.";
@@ -462,13 +466,11 @@ entryForm.addEventListener("submit", async (event) => {
         return;
     }
 
-    await api("/entries", {
-        method: "POST",
-        body: new FormData(entryForm)
-    });
-
     try {
-        await api("/entries", { method: "POST", body: JSON.stringify(data) });
+        await api("/entries", {
+            method: "POST",
+            body: new FormData(entryForm)
+        });
         entryForm.reset();
         sleepSummary.textContent = "";
         notesCount.hidden = true;
@@ -480,6 +482,100 @@ entryForm.addEventListener("submit", async (event) => {
         }
         entryError.textContent = err.message;
     }
+});
+
+/* Settings */
+const settingsForm = document.getElementById("settings-form");
+const settingsStatus = document.getElementById("settings-status");
+const settingsSave = document.getElementById("save-settings-button");
+let settingsRequest = 0;
+
+function clearPrivateData() {
+    settingsRequest++;
+    settingsForm.reset();
+    settingsSave.disabled = true;
+    settingsStatus.textContent = "";
+    document.getElementById("settings-email").textContent = "";
+    document.getElementById("delete-account-form").reset();
+    document.getElementById("delete-account-form").hidden = true;
+    journalContainer.replaceChildren();
+    clearStats();
+}
+
+async function loadSettings() {
+    const request = ++settingsRequest;
+    settingsSave.disabled = true;
+    settingsStatus.textContent = "Loading settings...";
+    try {
+        const settings = await api("/settings");
+        if (request !== settingsRequest || !loggedIn) return;
+        settingsForm.elements.username.value = settings.username;
+        settingsForm.elements.sleep_goal_hours.value = settings.sleep_goal_hours;
+        settingsForm.elements.target_wake_time.value = settings.target_wake_time.slice(0, 5);
+        document.getElementById("settings-email").textContent = settings.email;
+        settingsSave.disabled = false;
+        settingsStatus.textContent = "";
+    } catch (err) {
+        if (request !== settingsRequest) return;
+        if (err.status === 401) return handleSessionExpired();
+        settingsStatus.textContent = err.message;
+    }
+}
+
+settingsForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!settingsForm.reportValidity()) return;
+    settingsSave.disabled = true;
+    settingsStatus.textContent = "Saving...";
+    try {
+        await api("/settings", { method: "PUT", body: new FormData(settingsForm) });
+        settingsStatus.textContent = "Settings saved. Your statistics will use your new goal.";
+    } catch (err) {
+        if (err.status === 401) return handleSessionExpired();
+        settingsStatus.textContent = err.message;
+    } finally {
+        settingsSave.disabled = !loggedIn;
+    }
+});
+
+document.getElementById("sign-out-button").addEventListener("click", async (event) => {
+    event.target.disabled = true;
+    try {
+        await api("/logout", { method: "POST" });
+        loggedIn = false;
+        wantedPage = null;
+        clearPrivateData();
+        showPage(document.getElementById("log-in-page"));
+        logInNotice.textContent = "You have signed out.";
+    } catch (err) {
+        settingsStatus.textContent = err.message;
+    } finally { event.target.disabled = false; }
+});
+
+const deleteForm = document.getElementById("delete-account-form");
+document.getElementById("delete-account-button").addEventListener("click", () => {
+    deleteForm.hidden = false;
+    document.getElementById("delete-password").focus();
+});
+document.getElementById("cancel-delete-button").addEventListener("click", () => {
+    deleteForm.hidden = true;
+    deleteForm.reset();
+});
+deleteForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = deleteForm.querySelector('[type="submit"]');
+    button.disabled = true;
+    try {
+        await api("/account", { method: "DELETE", body: new FormData(deleteForm) });
+        loggedIn = false;
+        wantedPage = null;
+        clearPrivateData();
+        showPage(document.getElementById("log-in-page"));
+        logInNotice.textContent = "Your account and journals were deleted.";
+    } catch (err) {
+        if (err.status === 401) return handleSessionExpired();
+        settingsStatus.textContent = err.message;
+    } finally { button.disabled = false; }
 });
 
 /* on start up */

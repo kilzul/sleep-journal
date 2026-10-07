@@ -672,3 +672,31 @@ textarea {
 
 }
 
+
+/* Settings and journal statistics */
+#settings-page, #statistics-page {
+    width: min(900px, calc(100vw - 110px));
+    margin: 24px 12px 90px 90px;
+    font-family: Chewy, sans-serif;
+}
+#settings-page .page-title, #statistics-page .page-title {
+    font-family: DynaPuff-Bold, sans-serif;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+#settings-form { display: grid; gap: 10px; }
+#settings-form input { margin: 0; width: 100%; }
+#settings-form button { width: 100%; }
+#settings-status, #stats-status, #stats-insight { margin: 16px 0; }
+#settings-container > button, #stats-period {
+    padding: 12px; border-radius: 8px; border: 1px solid #000; margin: 8px 4px 8px 0;
+    background: #7ee5ff; font: inherit;
+}
+button:disabled { opacity: 0.6; cursor: wait; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.stats-grid .data-card { background: #7ee5ff; padding: 18px; border-radius: 20px; }
+.stats-grid h2 { font-size: 1rem; margin-bottom: 8px; }
+.stats-grid p { font-size: 1.4rem; }
+.sleep-history-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; align-items: center; }
+.sleep-history-row meter { flex: 1; min-width: 100px; height: 24px; }
+#delete-account-form { margin-top: 20px; }
