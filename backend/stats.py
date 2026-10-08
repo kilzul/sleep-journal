@@ -23,6 +23,15 @@ def average_clock(values):
     return clock(atan2(y, x) * 1440 / (2 * pi))
 
 
+def calculate_overview(entries):
+    dates = [date.fromisoformat(row['sleep_date']) if isinstance(row['sleep_date'], str)
+             else row['sleep_date'] for row in entries]
+    total = sum((minutes(row['wake_time']) - minutes(row['bedtime'])) % 1440 / 60
+                for row in entries)
+    return {'entry_count': len(entries), 'first_entry_date': min(dates) if dates else None,
+            'total_sleep_hours': round(total, 2)}
+
+
 def calculate_stats(entries, settings, days=30, today=None):
     today = today or date.today()
     rows = []

@@ -1,7 +1,7 @@
-import { api } from "./api.fake.js";
-import { loadStats, clearStats  } from "./stats.js";
+import { api } from "./api.js";
+import { loadStats, loadOverview, clearStats } from "./stats.js";
 
-const DEV_BYPASS = true; // will delete this before merging or will make false;
+const DEV_BYPASS = false;
 
 const protectedPages = ["overview-page", "journals-page", "journal-form", "calendar-page", "statistics-page", "settings-page"];
 const pages = document.querySelectorAll(".page");
@@ -30,8 +30,7 @@ async function withLoading(task, message = "Loading...", delay = 0, minShow = 75
     else show();
 
     try {
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timed out")), 15000));
-        return await Promise.race([task(), timeout]);
+        return await task();
     } finally {
         clearTimeout(timer);
         const remaining = minShow - (Date.now() - shownAt);
@@ -85,7 +84,7 @@ function showPage(page) {
 
     if (shouldShake) shake(logInNotice);
     if (page.id === "journals-page") withLoading(() => loadJournals(), "Loading your journal entries...");
-    if (page.id === "overview-page") withLoading(() => loadOverview(), "Loading your overview...");
+    if (page.id === "overview-page") withLoading(() => loadOverview(handleSessionExpired), "Loading your overview...");
     if (page.id === "settings-page") withLoading(() => loadSettings(), "Loading your settings...");
     if (page.id === "statistics-page") withLoading(() => loadStats(handleSessionExpired), "Loading your statistics...");
 }
@@ -500,7 +499,6 @@ entryForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     entryError.textContent = "";
     checkTimes();
-    document.getElementById("save-journal-button").disabled = true;
 
     const invalid = [...entryForm.querySelectorAll("input:invalid, textarea:invalid")];
     invalid.forEach((el) => el.closest(".box").classList.add("invalid"));
@@ -510,6 +508,8 @@ entryForm.addEventListener("submit", async (event) => {
         return;
     }
 
+    const saveButton = document.getElementById("save-journal-button");
+    saveButton.disabled = true;
     try {
         await api("/entries", {
             method: "POST",
@@ -525,6 +525,8 @@ entryForm.addEventListener("submit", async (event) => {
             return;
         }
         entryError.textContent = err.message;
+    } finally {
+        saveButton.disabled = false;
     }
 });
 
@@ -543,7 +545,9 @@ function clearPrivateData() {
     document.getElementById("settings-email").textContent = "";
     document.getElementById("delete-account-form").reset();
     document.getElementById("delete-account-form").hidden = true;
-    journalContainer.replaceChildren();
+    journalCards = [];
+    journalGrid.replaceChildren();
+    journalSearch.value = "";
     clearStats();
 }
 
@@ -635,12 +639,11 @@ async function startUp() {
         loadingText.textContent = "Waking things up... the first load can take a minute.";
     }, 5000);
     try {
-        if (!DEV_BYPASS) await restoreLogin();
+        if (!DEV_BYPASS) await withLoading(restoreLogin, "Getting your sleep journal ready...");
     } finally {
         clearTimeout(slowTimer);
-        loadingScreen.hidden = true;
+        if (loadingCount === 0) loadingScreen.hidden = true;
     }
 }
 
 startUp();
-if (!DEV_BYPASS) restoreLogin();

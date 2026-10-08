@@ -1,0 +1,68 @@
+Snoozely deployment
+
+Recommended layout: one Render Python Web Service serves both FastAPI and the
+static frontend. Supabase remains the database. Frontend requests to /api and
+session cookies stay on the same domain.
+
+Before deploying
+1. Use the integration/frontend-backend branch with the tested fixes, or merge
+   that branch into main first. The existing main branch alone is missing the
+   settings/stats backend. The frontend and backend branches individually do
+   not contain a complete deployable app.
+2. Commit and push the chosen combined branch to GitHub.
+3. Keep .env out of Git. SUPABASE_DB_URL is a backend secret.
+
+Render dashboard setup
+1. Create New > Web Service and connect kilzul/sleep-journal.
+2. Choose the combined branch you pushed (main after merging, otherwise
+   integration/frontend-backend). Leave Root Directory blank.
+3. Runtime: Python 3. The .python-version file selects Python 3.13.
+4. Build Command: pip install -r requirements.txt
+5. Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
+6. Health Check Path: /healthz
+7. Set these environment variables:
+   SUPABASE_DB_URL: your existing Supabase Postgres URL. For an IPv4 host,
+     copy Connect > Session pooler from Supabase (port 5432), with the correct
+     database password, and use sslmode=require. Do not use a publishable API
+     key in place of the database connection URL.
+   APP_URL: the exact public HTTPS origin, e.g. https://snoozely.onrender.com
+     (use your actual assigned URL, not this example). This setting enables
+     secure session cookies and permits writes from that origin. When changing
+     the domain, update this setting and restart/redeploy the service.
+8. Deploy. Once the assigned Render URL is known, confirm APP_URL matches it
+   and redeploy if needed before testing login or journal/settings writes.
+
+Alternative: use the included render.yaml as a Render Blueprint. Select the
+combined branch when creating the Blueprint and provide both environment
+variables. The file uses the free plan; review Render's current plan options
+before launching for regular use.
+
+Database
+The configured existing database already has users, journals, user_sessions,
+sleep_goal_hours, and target_wake_time. This deployment reuses it and does not
+run schema changes automatically. A different/fresh database needs those tables
+and preference columns provisioned before authenticated pages can work.
+
+Verify the deployed app
+- /healthz should return {"status":"ok"}. This only checks that the app runs.
+- Sign up/log in, create a journal, load Overview and Statistics, save Settings,
+  refresh to verify the session and saved goal, then sign out.
+- Test Calendar separately: it currently contains a placeholder, not a calendar.
+- If writes return 403, check APP_URL matches the browser's origin.
+- If authenticated requests return 503, check the database URL/password,
+  database availability, and the pooler's network compatibility.
+
+Local verification
+pip install -r requirements-dev.txt
+python -m unittest discover -s tests -v
+playwright install chromium
+python tests/browser_smoke.py
+
+The live browser smoke test explicitly creates its own temporary account in
+the configured database and removes that account and its entries afterward.
+
+Official references
+https://render.com/docs/deploy-fastapi
+https://render.com/docs/python-version
+https://render.com/docs/blueprint-spec
+https://supabase.com/docs/guides/database/connecting-to-postgres

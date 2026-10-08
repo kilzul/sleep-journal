@@ -1,7 +1,5 @@
 import { api } from "./api.js";
 
-const today = null;
-const stats= null; 
 
 const statCards = document.getElementById("stats-cards");
 const statStatus = document.getElementById("stats-status");
@@ -10,9 +8,13 @@ const statHistory = document.getElementById("stats-history");
 const statPeriod = document.getElementById("stats-period");
 let requestId = 0;
 let onExpired;
+let overviewRequestId = 0;
 
 export function clearStats() {
     requestId++;
+    overviewRequestId++;
+    overviewCards.replaceChildren();
+    overviewStatus.textContent = "";
     statCards.replaceChildren();
     statHistory.replaceChildren();
     statInsight.textContent = "";
@@ -36,8 +38,8 @@ export async function loadStats(handleExpired = onExpired) {
     const request = requestId;
     statStatus.textContent = "Loading your statistics...";
     try {
-        today = new Date().toLocaleDateString("en-CA");
-        stats = await api(`/stats?days=${statPeriod.value}&today=${today}`);
+        const today = new Date().toLocaleDateString("en-CA");
+        const stats = await api(`/stats?days=${statPeriod.value}&today=${today}`);
         if (request !== requestId) return;
         statStatus.textContent = stats.entry_count ? `Based on ${stats.entry_count} journal entries.` : "Add your first sleep journal to see your trends.";
         const hours = value => value == null ? "—" : `${value.toFixed(1)} hours`;
@@ -77,21 +79,22 @@ statPeriod.addEventListener("change", () => loadStats());
 const overviewCards = document.getElementById("overview-cards");
 const overviewStatus = document.getElementById("overview-status");
 
-export async function loadOverview() {
-    clearStats();
-    const request = requestId;
+export async function loadOverview(handleExpired = onExpired) {
+    onExpired = handleExpired;
+    const request = ++overviewRequestId;
+    overviewCards.replaceChildren();
     overviewStatus.textContent = "Loading your overview...";
     try {
         const overview = await api("/overview");
-        if (request !== requestId) return;
+        if (request !== overviewRequestId) return;
         overviewStatus.textContent = "Your overview is ready.";
         overviewCards.append(
             card("Total entries", overview.entry_count),
-            card("Snoozely user since...", overview.first_entry_date ? `${overview.first_entry_date}` : "—"),
+            card("First sleep entry", overview.first_entry_date ? `${overview.first_entry_date}` : "—"),
             card("Total sleep hours", overview.total_sleep_hours == null ? "—" : `${overview.total_sleep_hours.toFixed(1)} hours`)
         );
     } catch (err) {
-        if (request !== requestId) return;
+        if (request !== overviewRequestId) return;
         if (err.status === 401 && onExpired) return onExpired();
         overviewStatus.textContent = err.message;
     }

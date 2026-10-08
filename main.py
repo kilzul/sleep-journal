@@ -11,7 +11,7 @@ from backend.db import (
     authenticate_user, delete_journal, get_user_journals, insert_journal, insert_user,
     get_settings, update_settings, delete_account,
 )
-from backend.stats import calculate_stats
+from backend.stats import calculate_stats, calculate_overview
 from backend.sessions import (
     COOKIE_NAME, COOKIE_SECURE, create_session, get_current_user,
     revoke_session, set_session_cookie, verify_request_origin,
@@ -31,7 +31,16 @@ if STATIC_DIR.is_dir():
         if directory.is_dir():
             app.mount(f"/{folder}", StaticFiles(directory=directory), name=folder)
 
-app.mount("/fonts", StaticFiles(directory=STATIC_DIR / "fonts"), name="fonts")
+
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok"}
+
+
+@app.get("/api/overview")
+def read_overview(response: Response, user: dict = Depends(get_current_user)):
+    response.headers["Cache-Control"] = "no-store"
+    return calculate_overview(get_user_journals(user["id"]))
 
 @app.get("/api/settings")
 def read_settings(response: Response, user: dict = Depends(get_current_user)):
