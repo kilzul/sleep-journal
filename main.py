@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
-from fastapi import Body, Depends, FastAPI, Form, HTTPException, Path as PathParam, Request, Response
+from fastapi import Depends, FastAPI, Form, HTTPException, Path as PathParam, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from psycopg import Error
@@ -111,23 +111,8 @@ def list_journals(response: Response, user: dict = Depends(get_current_user)):
 
 
 @app.post("/api/entries", status_code=201)
-def handle_entry(
-    response: Response,
-    sleep_date: date = Body(...),
-    bedtime: time = Body(...),
-    wake_time: time = Body(...),
-    quality: int = Body(..., ge=1, le=5, strict=True),
-    notes: str = Body("", max_length=200),
-    user: dict = Depends(get_current_user),
-    _origin=Depends(verify_request_origin),
-):
-    """Accept the existing frontend's JSON fields without a custom model class."""
-    response.headers["Cache-Control"] = "no-store"
-    return save_journal(user["id"], sleep_date, bedtime, wake_time, quality, notes)
-
-
 @app.post("/api/journals", status_code=201)
-def handle_journal(
+def handle_entry(
     response: Response,
     sleep_date: date = Form(...),
     bedtime: time = Form(...),
@@ -137,7 +122,7 @@ def handle_journal(
     user: dict = Depends(get_current_user),
     _origin=Depends(verify_request_origin),
 ):
-    """Keep the original HTML form endpoint working with the same database insert."""
+    """Accept the frontend's FormData; both paths save through the same function."""
     response.headers["Cache-Control"] = "no-store"
     return save_journal(user["id"], sleep_date, bedtime, wake_time, quality, notes)
 

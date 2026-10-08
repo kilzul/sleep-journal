@@ -19,7 +19,7 @@ export function clearStats() {
     statStatus.textContent = "";
 }
 
-function card(label, value) {
+export function card(label, value) {
     const node = document.createElement("div");
     node.className = "data-card";
     const title = document.createElement("h2");

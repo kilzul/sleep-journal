@@ -1,5 +1,5 @@
 import { api } from "./api.fake.js";
-import { loadStats, clearStats, card,  } from "./stats.js";
+import { loadStats, clearStats  } from "./stats.js";
 
 const DEV_BYPASS = true; // will delete this before merging or will make false;
 
@@ -643,3 +643,4 @@ async function startUp() {
 }
 
 startUp();
+if (!DEV_BYPASS) restoreLogin();
