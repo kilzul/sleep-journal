@@ -20,7 +20,11 @@ export async function api(path, options = {}) {
     }
 
     if (path === "/entries" && method === "POST") {
-        const entry = { id: Date.now(), ...JSON.parse(options.body) };
+        const entry = {
+            id: Date.now(),
+            ...Object.fromEntries(options.body.entries())
+            };
+
         saveJournal([entry, ...loadJournals()]);
         return entry;
     }

@@ -1,6 +1,7 @@
-import { api } from "./api.js"; // will switch this to api.js when the endpoints r up
+import { api } from "./api.fake.js";
+import { loadStats, clearStats, card,  } from "./stats.js";
 
-const DEV_BYPASS = false; // will delete this before merging or will make false;
+const DEV_BYPASS = true; // will delete this before merging or will make false;
 
 const protectedPages = ["overview-page", "journals-page", "journal-form", "calendar-page", "statistics-page", "settings-page"];
 const pages = document.querySelectorAll(".page");
@@ -9,6 +10,36 @@ let wantedPage = null;
 let loggedIn = false;
 
 /* helpers */
+
+const loadingScreen = document.getElementById("loading-screen");
+const loadingText = document.getElementById("loading-text");
+let loadingCount = 0;
+
+async function withLoading(task, message = "Loading...", delay = 0, minShow = 750) {
+    loadingCount++;
+    let shownAt = 0;
+    let timer = null;
+
+    const show = () => {
+        loadingText.textContent = message;
+        loadingScreen.hidden = false;
+        shownAt = Date.now();
+    };
+
+    if (delay > 0) timer = setTimeout(show, delay);
+    else show();
+
+    try {
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timed out")), 15000));
+        return await Promise.race([task(), timeout]);
+    } finally {
+        clearTimeout(timer);
+        const remaining = minShow - (Date.now() - shownAt);
+        if (shownAt && remaining > 0) await new Promise(r => setTimeout(r, remaining));
+        loadingCount--;
+        if (loadingCount === 0) loadingScreen.hidden = true;
+    }
+}
 
 function shake(el) {
     el.classList.remove("shake");
@@ -53,11 +84,15 @@ function showPage(page) {
     page.hidden = false;
 
     if (shouldShake) shake(logInNotice);
-    if (page.id === "journals-page") loadJournals();
+    if (page.id === "journals-page") withLoading(() => loadJournals(), "Loading your journal entries...");
+    if (page.id === "overview-page") withLoading(() => loadOverview(), "Loading your overview...");
+    if (page.id === "settings-page") withLoading(() => loadSettings(), "Loading your settings...");
+    if (page.id === "statistics-page") withLoading(() => loadStats(handleSessionExpired), "Loading your statistics...");
 }
 
 function handleSessionExpired() {
     loggedIn = false;
+    clearPrivateData();
     wantedPage = null;
     showPage(document.getElementById("log-in-page"));
     logInNotice.textContent = "Your session expired. Please log in again.";
@@ -252,7 +287,7 @@ async function restoreLogin() {
 
 /* journal page */
 
-const journalContainer = document.getElementById("journals-container");
+const journalGrid = document.getElementById("journal-grid");
 const addJournal = document.getElementById("add-journal-button");
 const statusText = document.getElementById("journals-status");
 const journalSearch = document.getElementById("entry-search");
@@ -265,19 +300,29 @@ const qualityIcons = {
     5: "fa-face-grin-stars"
 };
 
-function filterJournals() {
-    const query = journalSearch.value.trim().toLowerCase();
-    const cards = [...journalContainer.querySelectorAll(".journal-card")];
+let journalCards = [];
 
-    cards.forEach(card => {
-        card.hidden = query !== "" && !card.dataset.search.includes(query);
-    });
-
-    if (cards.length === 0) return;
-    statusText.textContent = cards.some(card => !card.hidden) ? "" : "Sorry, we couldn't find that one.";
+function buildPages(cards, keepScroll = false) {
+    const scrollTop = journalGrid.scrollTop;
+    journalGrid.replaceChildren();
+    for (let i = 0; i < cards.length; i += 9) {
+        const page = document.createElement("div");
+        page.className = "journal-page";
+        page.append(...cards.slice(i, i + 9));
+        journalGrid.append(page);
+    }
+    journalGrid.scrollTop = keepScroll ? scrollTop : 0;
 }
 
-journalSearch.addEventListener("input", filterJournals);
+function filterJournals(keepScroll = false) {
+    const query = journalSearch.value.trim().toLowerCase();
+    const matches = journalCards.filter(card => query === "" || card.dataset.search.includes(query));
+    buildPages(matches, keepScroll);
+    if (journalCards.length === 0) return;
+    statusText.textContent = matches.length ? "" : "Sorry, we couldn't find that one.";
+}
+
+journalSearch.addEventListener("input", () => filterJournals());
 
 function createJournalCard(entry) {
     const card = document.createElement("div");
@@ -325,13 +370,13 @@ function createJournalCard(entry) {
 }
 
 function renderEntries(entries) {
-    journalContainer.replaceChildren();
-    if (entries.length === 0) {
+    journalCards = entries.map(createJournalCard);
+    if (journalCards.length === 0) {
+        journalGrid.replaceChildren();
         statusText.textContent = "Make your first entry and we'll show it here!";
         return;
     }
     statusText.textContent = "";
-    journalContainer.append(...entries.map(createJournalCard));
     filterJournals();
 }
 
@@ -349,7 +394,7 @@ async function loadJournals() {
     }
 }
 
-journalContainer.addEventListener("click", async (event) => {
+journalGrid.addEventListener("click", async (event) => {
     const btn = event.target.closest(".delete-entry");
     if (!btn) return;
 
@@ -358,10 +403,12 @@ journalContainer.addEventListener("click", async (event) => {
     try {
         await api("/entries/" + card.dataset.id, { method: "DELETE" });
         card.remove();
-        if (!journalContainer.children.length) {
+        journalCards = journalCards.filter(c => c !== card);
+        if (journalCards.length === 0) {
+            journalGrid.replaceChildren();
             statusText.textContent = "Make your first entry and we'll show it here!";
         } else {
-            filterJournals();
+            filterJournals(true);
         }
     } catch (err) {
         btn.disabled = false;
@@ -453,6 +500,7 @@ entryForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     entryError.textContent = "";
     checkTimes();
+    document.getElementById("save-journal-button").disabled = true;
 
     const invalid = [...entryForm.querySelectorAll("input:invalid, textarea:invalid")];
     invalid.forEach((el) => el.closest(".box").classList.add("invalid"));
@@ -462,13 +510,11 @@ entryForm.addEventListener("submit", async (event) => {
         return;
     }
 
-    await api("/entries", {
-        method: "POST",
-        body: new FormData(entryForm)
-    });
-
     try {
-        await api("/entries", { method: "POST", body: JSON.stringify(data) });
+        await api("/entries", {
+            method: "POST",
+            body: new FormData(entryForm)
+        });
         entryForm.reset();
         sleepSummary.textContent = "";
         notesCount.hidden = true;
@@ -482,6 +528,118 @@ entryForm.addEventListener("submit", async (event) => {
     }
 });
 
+/* settings */
+
+const settingsForm = document.getElementById("settings-form");
+const settingsStatus = document.getElementById("settings-status");
+const settingsSave = document.getElementById("save-settings-button");
+let settingsRequest = 0;
+
+function clearPrivateData() {
+    settingsRequest++;
+    settingsForm.reset();
+    settingsSave.disabled = true;
+    settingsStatus.textContent = "";
+    document.getElementById("settings-email").textContent = "";
+    document.getElementById("delete-account-form").reset();
+    document.getElementById("delete-account-form").hidden = true;
+    journalContainer.replaceChildren();
+    clearStats();
+}
+
+async function loadSettings() {
+    const request = ++settingsRequest;
+    settingsSave.disabled = true;
+    settingsStatus.textContent = "Loading settings...";
+    try {
+        const settings = await api("/settings");
+        if (request !== settingsRequest || !loggedIn) return;
+        settingsForm.elements.username.value = settings.username;
+        settingsForm.elements.sleep_goal_hours.value = settings.sleep_goal_hours;
+        settingsForm.elements.target_wake_time.value = settings.target_wake_time.slice(0, 5);
+        document.getElementById("settings-email").textContent = settings.email;
+        settingsSave.disabled = false;
+        settingsStatus.textContent = "";
+    } catch (err) {
+        if (request !== settingsRequest) return;
+        if (err.status === 401) return handleSessionExpired();
+        settingsStatus.textContent = err.message;
+    }
+}
+
+settingsForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!settingsForm.reportValidity()) return;
+    settingsSave.disabled = true;
+    settingsStatus.textContent = "Saving...";
+    try {
+        await api("/settings", { method: "PUT", body: new FormData(settingsForm) });
+        settingsStatus.textContent = "Settings saved. Your statistics will use your new goal.";
+    } catch (err) {
+        if (err.status === 401) return handleSessionExpired();
+        settingsStatus.textContent = err.message;
+    } finally {
+        settingsSave.disabled = !loggedIn;
+    }
+});
+
+document.getElementById("sign-out-button").addEventListener("click", async (event) => {
+    event.target.disabled = true;
+    try {
+        await api("/logout", { method: "POST" });
+        loggedIn = false;
+        wantedPage = null;
+        clearPrivateData();
+        showPage(document.getElementById("log-in-page"));
+        logInNotice.textContent = "You have signed out.";
+    } catch (err) {
+        settingsStatus.textContent = err.message;
+    } finally { event.target.disabled = false; }
+});
+
+const deleteForm = document.getElementById("delete-account-form");
+document.getElementById("delete-account-button").addEventListener("click", () => {
+    deleteForm.hidden = false;
+    document.getElementById("delete-password").focus();
+});
+document.getElementById("cancel-delete-button").addEventListener("click", () => {
+    deleteForm.hidden = true;
+    deleteForm.reset();
+});
+deleteForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = deleteForm.querySelector('[type="submit"]');
+    button.disabled = true;
+    try {
+        await api("/account", { method: "DELETE", body: new FormData(deleteForm) });
+        loggedIn = false;
+        wantedPage = null;
+        clearPrivateData();
+        showPage(document.getElementById("log-in-page"));
+        logInNotice.textContent = "Your account and journals were deleted.";
+    } catch (err) {
+        if (err.status === 401) return handleSessionExpired();
+        settingsStatus.textContent = err.message;
+    } finally { button.disabled = false; }
+});
+
 /* on start up */
 
-if (!DEV_BYPASS) restoreLogin();
+
+setTimeout(() => {
+    if (!loadingScreen.hidden) loadingText.textContent = "This is taking too long. Try refreshing the page.";
+}, 20000);
+
+async function startUp() {
+    const slowTimer = setTimeout(() => {
+        loadingText.textContent = "Waking things up... the first load can take a minute.";
+    }, 5000);
+    try {
+        if (!DEV_BYPASS) await restoreLogin();
+    } finally {
+        clearTimeout(slowTimer);
+        loadingScreen.hidden = true;
+    }
+}
+
+startUp();

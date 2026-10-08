@@ -9,6 +9,11 @@
 </head>
 <body>
 
+<div id="loading-screen" role="status" aria-live="polite">
+    <i class="fa-solid fa-moon loading-moon" aria-hidden="true"></i>
+    <p id="loading-text">Getting your sleep journal ready...</p>
+</div>
+
 
 <div class="layout">
 
@@ -132,33 +137,11 @@
 
     <section data-route="overview" class="page" id="overview-page" hidden>
       <div class="page-title">Overview</div>
+      <div id="overview-container">
+        <p id="overview-status" role="status" aria-live="polite"></p>
+        <div id="overview-cards" class="stats-grid">
 
-      <div id="bedtime-timer" class="data-card">
-        <p class="data-card-title">Bedtime Timer</p>
-        <div id="bedtime-timer-display">
-          <span id="bedtime-timer-graphic"></span>
-          <span id="bedtime-timer-description"></span>
-          <span id="bedtime-timer-value"></span>
         </div>
-      </div>
-
-      <div id="best-sleep-day" class="data-card">
-        <p class="data-card-title">Best Sleep Day</p>
-        <div id="week-month-year">
-          <span class="best-sleep-day-selector">Week</span>
-          <span class="best-sleep-day-selector">Month</span>
-          <span class="best-sleep-day-selector">Year</span>
-        </div>
-        <div id="best-sleep-day-display">
-          <span id="best-sleep-day-graphic"></span>
-          <span id="best-sleep-day-value"></span>
-        </div>
-      </div>
-
-      <div id="weekly-sleep-average" class="data-card">
-        <p class="data-card-title">Weekly Sleep Average</p>
-        <p class="data-card-value" id="weekly-sleep-average-value"></p>
-        <span id="circle-graphic-weekly-sleep-average"></span>
       </div>
     </section>
 
@@ -170,7 +153,9 @@
         </div>
         <p id="journals-status" role="status"></p>
         <div id="journals-container">
+          <div id="journal-grid">
             <!-- app.js loads journal entries and puts em here -->
+          </div>
         </div>
     </section>
 
@@ -242,7 +227,7 @@
         </div>
 
         <p id="entry-error" role="alert"></p>
-        <button type="submit">Save entry</button>
+        <button id="save-journal-button" type="submit">Save entry</button>
       </form>
       </div>
     </section>
@@ -257,16 +242,39 @@
     <section data-route="stats" class="page" id="statistics-page" hidden>
       <div class="page-title" id="statistics-title"><p>Statistics</p></div>
       <div id="statistics-container">
-        <!-- will put your graphs and stuff here -->
+        <label for="stats-period">Show</label>
+        <select id="stats-period"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="365">Last year</option></select>
+        <p id="stats-status" role="status" aria-live="polite"></p>
+        <div id="stats-cards" class="stats-grid"></div>
+        <p id="stats-insight"></p>
+        <h2>Recent sleep</h2>
+        <div id="stats-history"></div>
       </div>
     </section>
 
     <section data-route="settings" class="page" id="settings-page" hidden>
       <p class="page-title" id="settings-title">Settings</p>
       <div id="settings-container">
-        <button type="button" id="change-name-button">Change Name</button>
+        <form id="settings-form" class="form">
+          <label for="settings-name">Name</label>
+          <input id="settings-name" name="username" required maxlength="100">
+          <p id="settings-email"></p>
+          <label for="sleep-goal">Sleep goal (hours)</label>
+          <input id="sleep-goal" name="sleep_goal_hours" type="number" min="1" max="16" step="0.25" required>
+          <label for="target-wake">Target wake-up time</label>
+          <input id="target-wake" name="target_wake_time" type="time" required>
+          <button type="submit" id="save-settings-button" disabled>Save settings</button>
+        </form>
+        <p id="settings-status" role="status" aria-live="polite"></p>
         <button type="button" id="sign-out-button">Sign Out</button>
         <button type="button" id="delete-account-button">Delete Account</button>
+        <form id="delete-account-form" class="form" hidden>
+          <p>This permanently deletes your account and all sleep journals. Enter your password to confirm.</p>
+          <label for="delete-password">Password</label>
+          <input id="delete-password" name="password" type="password" autocomplete="current-password" required>
+          <button type="submit">Permanently delete my account</button>
+          <button type="button" id="cancel-delete-button">Cancel</button>
+        </form>
       </div>
     </section>
 
