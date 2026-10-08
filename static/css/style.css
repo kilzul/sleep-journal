@@ -712,12 +712,13 @@ textarea {
 /* Settings and journal statistics */
 
 
-#settings-page, #statistics-page {
+#settings-page, #statistics-page, #overview-page, #calendar-page {
     width: min(900px, calc(100vw - 110px));
     margin: 24px 12px 90px 90px;
     font-family: Chewy, sans-serif;
 }
-#settings-page .page-title, #statistics-page .page-title {
+#settings-page .page-title, #statistics-page .page-title,
+#overview-page .page-title, #calendar-page .page-title {
     font-family: DynaPuff-Bold, sans-serif;
     font-size: 2rem;
     margin-bottom: 20px;
@@ -736,7 +737,7 @@ textarea {
     width: 100%; 
 }
 
-#settings-status, #stats-status, #stats-insight { 
+#settings-status, #stats-status, #stats-insight, #overview-status {
     margin: 16px 0; 
 }
 
@@ -818,4 +819,29 @@ button:disabled {
     .loading-moon { animation: none; }
 }
 
-/* overview page */ 
+/* Calendar placeholder */
+
+.coming-soon {
+    background: #7ee5ff;
+    border-radius: 20px;
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.coming-soon-icon {
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.coming-soon h2 {
+    font-family: DynaPuff-Bold, sans-serif;
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+}
+
+.coming-soon p {
+    font-size: 1.2rem;
+    max-width: 420px;
+    margin: 0 auto;
+}
