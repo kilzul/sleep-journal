@@ -845,3 +845,129 @@ button:disabled {
     max-width: 420px;
     margin: 0 auto;
 }
+
+/* Navigation controls and responsive layouts */
+.nav-button {
+    position: relative;
+    display: flex;
+    width: 100%;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: #000;
+    white-space: nowrap;
+    text-align: left;
+}
+.nav-button:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: -3px;
+    border-radius: 12px;
+}
+
+@media (max-width: 1200px) {
+    #journals-page {
+        min-width: 0;
+        width: calc(100vw - 120px);
+        height: auto;
+        margin: 24px 12px 90px 90px;
+    }
+    #journals-page .page-title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+    }
+    #journals-title { min-width: 0 !important; font-size: 2rem; }
+    #entry-search { position: static; margin: 0; width: 100%; order: 3; }
+    #add-journal-button { position: static; margin: 0 0 0 auto; flex-shrink: 0; }
+    #journal-grid { width: 100%; height: auto; overflow: visible; scroll-snap-type: none; }
+    .journal-page {
+        height: auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: none;
+        grid-auto-flow: row;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .journal-card {
+        min-width: 0;
+        padding: 18px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "date delete" "hours quality" "notes notes";
+    }
+    .delete-entry { min-width: 44px; min-height: 44px; border-radius: 8px; }
+}
+
+@media (max-width: 767px) {
+    body { display: block; min-height: 100svh; }
+    .layout {
+        width: 100%;
+        padding: 16px 12px calc(100px + env(safe-area-inset-bottom));
+    }
+    main { min-width: 0; }
+    .page,
+    #log-in-page, #sign-up-page, #journals-page,
+    #settings-page, #statistics-page, #overview-page, #calendar-page {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        min-height: 0;
+        margin: 0;
+        padding: 20px 16px;
+        border-radius: 24px;
+    }
+    #navbar, #navbar:hover {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        transform: none;
+        padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+        border-radius: 20px 20px 0 0;
+        transition: none;
+        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
+    }
+    #navbar ul { height: auto; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    #navbar #logo, #navbar #sleep-profile { display: none; }
+    #navbar .selector { margin: 0; min-width: 0; }
+    #navbar ul li:last-child { position: static; width: auto; }
+    .nav-button { flex-direction: column; align-items: center; min-height: 64px; }
+    .sidebar-icon { min-width: 0; height: 34px; font-size: 20px; }
+    .selector-text { height: 24px; font-size: clamp(9px, 2.5vw, 12px); letter-spacing: 0; }
+    #bottom { position: static; min-width: 0; min-height: 0; margin: 24px 0 0; }
+    .creators-section { justify-content: center; }
+    #footer { position: static; text-align: center; font-size: 12px; margin-top: 20px; }
+    input:not(.quality-input), textarea {
+        width: 100%;
+        min-width: 0;
+        margin: 12px 0;
+        font-size: 16px;
+    }
+    textarea { height: 180px; }
+    .form button { width: 100%; min-height: 48px; height: auto; padding: 12px; }
+    .form button:hover { transform: none; }
+    label { font-size: 1rem; }
+    #log-in-title-text, #sign-up-title-text { font-size: 1.5rem; }
+    #new-entry { font-size: 2rem; margin-bottom: 24px; }
+    .error, .success,
+    .form-group:has(input:invalid:not(:placeholder-shown)) .error,
+    .form-group:has(input:valid:not(:placeholder-shown)) .success {
+        position: static;
+        margin: 4px 0;
+        overflow-wrap: anywhere;
+    }
+    .quality-group { padding: 12px 8px; margin: 12px 0; }
+    .quality-options-container { gap: 4px; justify-content: space-between; }
+    .radio-box label { padding: 8px; font-size: 1.7rem; min-width: 44px; min-height: 44px; }
+    .journal-page { grid-template-columns: minmax(0, 1fr); }
+    .journal-card { min-height: 144px; }
+    #add-journal-button { width: 48px; min-height: 48px; }
+    #entry-search { margin: 0; }
+    .stats-grid { grid-template-columns: minmax(0, 1fr); }
+    .stats-grid .data-card { overflow-wrap: anywhere; }
+    #settings-container > button, #stats-period { min-height: 44px; }
+    #settings-form label { margin-top: 8px; }
+    .coming-soon { padding: 36px 16px; }
+    .link-menu { max-width: calc(100vw - 24px); }
+}
